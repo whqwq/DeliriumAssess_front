@@ -1,0 +1,24 @@
+{
+  "name": "front",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "element-plus": "^2.7.3",
+    "less": "^4.2.0",
+    "pinia": "^2.1.7",
+    "throttle": "^1.0.3",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "prettier": "3.2.5",
+    "vite": "^4.4.11"
+  }
+}
