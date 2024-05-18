@@ -21,7 +21,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 const project = ref({
-  id: route.query.id,
+  id: route.query.projectId,
   name: '项目A',
   description:
     '这是XXX医院的XXX项目，编号为XXX，项目内容为ABCDEFGHIJKLMN，持续时间为XXXX-XXXX，预期达到XXXXX等效果'

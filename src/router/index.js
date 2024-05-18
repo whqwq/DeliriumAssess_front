@@ -27,6 +27,16 @@ const router = createRouter({
       path: '/patient',
       name: 'patient',
       component: () => import('@/views/patient/Patient.vue')
+    },
+    {
+      path: '/startAssess',
+      name: 'startAssess',
+      component: () => import('@/views/assess/StartAssess.vue')
+    },
+    {
+      path: '/recordResult',
+      name: 'recordResult',
+      component: () => import('@/views/record/RecordResult.vue')
     }
   ]
 })

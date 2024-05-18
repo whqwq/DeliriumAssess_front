@@ -10,9 +10,9 @@
       />
     </div>
     <el-table :data="patientTable" class="patient-table">
-      <el-table-column fixed prop="id" label="患者编号"></el-table-column>
-      <el-table-column fixed prop="alpha" label="姓名首字母"></el-table-column>
-      <el-table-column prop="operateTime" label="手术时间" sortable></el-table-column>
+      <el-table-column prop="id" label="患者编号"></el-table-column>
+      <el-table-column prop="alpha" label="姓名首字母"></el-table-column>
+      <el-table-column prop="operateDate" label="手术日期" sortable></el-table-column>
       <el-table-column
         prop="hospital"
         label="所属医院"
@@ -37,11 +37,11 @@
         <el-form-item label="姓名首字母">
           <el-input v-model="addPatientForm.name" placeholder="请输入患者姓名首字母" name="alpha" />
         </el-form-item>
-        <el-form-item label="手术时间">
+        <el-form-item label="手术日期">
           <el-date-picker
-            v-model="addPatientForm.operateTime"
+            v-model="addPatientForm.operateDate"
             type="date"
-            placeholder="请选择患者手术时间"
+            placeholder="请选择患者手术日期"
           />
         </el-form-item>
         <el-button type="primary" @click="submitAddPatient" style="width: 100%">创建</el-button>
@@ -65,12 +65,12 @@ const searchContent = ref('')
 const isShowAddPatient = ref(false)
 const addPatientForm = ref({
   alpha: '',
-  operateTime: ''
+  operateDate: ''
 })
 const patientTable = ref([])
 const allPatientTable = ref([
-  { id: '001', alpha: 'W', operateTime: '2024-05-16', hospital: '北医一院' },
-  { id: '002', alpha: 'L', operateTime: '2024-05-17', hospital: '北医三院' }
+  { id: '001', alpha: 'W', operateDate: '2024-05-16', hospital: '北医一院' },
+  { id: '002', alpha: 'L', operateDate: '2024-05-17', hospital: '北医三院' }
 ])
 const hospitalList = computed(() =>
   allPatientTable.value.reduce((pre, cur) => {
@@ -81,7 +81,7 @@ const hospitalList = computed(() =>
 const hospitalFilters = computed(() => hospitalList.value.map((h) => ({ text: h, value: h })))
 const hospitalFilterHandler = (value, row, column) => row.hospital === value
 const gotoPatient = (index, row) => {
-  router.push({ path: '/patient', query: { projectId: project.id, patientId: row.id } })
+  router.push({ path: '/patient', query: { patientId: row.id } })
 }
 const handleDeletePatient = (index, row) => {
   ElMessageBox.confirm(`确认删除患者 ${row.id}${row.alpha} ？`, '警告', {
@@ -97,7 +97,7 @@ const searchCurPatientTable = (newS) => {
   const s = newS.toLowerCase()
   if (s) {
     patientTable.value = allPatientTable.value.filter((u) =>
-      `${u.alpha}${u.id}${u.operateTime}${u.hospital}`.toLowerCase().includes(s)
+      `${u.alpha}${u.id}${u.operateDate}${u.hospital}`.toLowerCase().includes(s)
     )
   } else {
     patientTable.value = allPatientTable.value

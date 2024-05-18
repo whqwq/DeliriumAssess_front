@@ -34,7 +34,7 @@ window.addEventListener('resize', getPageSize)
   background-color: #f3f4f8;
 }
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 0px;
   height: 7px;
 }
 ::-webkit-scrollbar-thumb {

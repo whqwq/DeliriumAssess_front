@@ -142,7 +142,7 @@ const showMember = (index, row) => {
   project2showMember.value = row
 }
 const gotoProject = (index, row) => {
-  router.push({ path: '/project', query: { id: row.id } })
+  router.push({ path: '/project', query: { projectId: row.id } })
 }
 const handleDeleteProject = (index, row) => {
   ElMessageBox.confirm(`确认删除项目 ${row.id} ${row.name} ？`, '警告', {
