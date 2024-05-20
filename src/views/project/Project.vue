@@ -31,6 +31,9 @@ const project = ref({
 <style scoped lang="less">
 @title-font-size: 20px;
 @description-font-size: 14px;
+.project {
+  padding: 32px;
+}
 .project-title {
   width: 100%;
   line-height: @title-font-size;
@@ -44,7 +47,7 @@ const project = ref({
   margin-top: 16px;
 }
 .project-main {
-  margin: 32px;
+  margin-bottom: 32px;
   background-color: white;
   padding: 16px 32px;
   border-radius: 4px;

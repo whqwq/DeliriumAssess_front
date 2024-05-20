@@ -12,10 +12,10 @@
         />
       </div>
       <el-table :data="projectTable" class="project-table">
-        <el-table-column fixed prop="id" label="项目编号"></el-table-column>
-        <el-table-column fixed prop="name" label="项目名"></el-table-column>
+        <el-table-column prop="id" label="项目编号"></el-table-column>
+        <el-table-column prop="name" label="项目名"></el-table-column>
         <el-table-column prop="leader" label="组长"></el-table-column>
-        <el-table-column fixed="right" label="操作" width="400">
+        <el-table-column label="操作" width="400">
           <template #default="scope">
             <el-button size="small" @click="gotoProject(scope.$index, scope.row)"
               >进入项目</el-button
@@ -173,8 +173,11 @@ watch(searchContent, searchCurProjectTable, { deep: true, immediate: true })
 </script>
 
 <style lang="less" scoped>
+.projectList {
+  padding: 32px;
+}
 .projectList-main {
-  margin: 32px;
+  margin-bottom: 32px;
   background-color: white;
   padding: 16px 32px;
   border-radius: 4px;

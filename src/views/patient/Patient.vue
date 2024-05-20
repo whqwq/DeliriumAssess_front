@@ -4,7 +4,7 @@
     <div class="main">
       <el-descriptions title="患者信息" border :column="2">
         <template #extra>
-          <el-button type="primary" @click="gotoAssess">进行谵妄评估</el-button>
+          <el-button type="primary" @click="isShowChooseAssess = true">进行谵妄评估</el-button>
         </template>
         <el-descriptions-item label="患者编号">{{
           patient.idInProject + ' ' + patient.alpha
@@ -51,6 +51,16 @@
         >
       </el-table>
     </div>
+    <el-dialog v-model="isShowChooseAssess" title="选择评估方法" width="300">
+      <el-radio-group v-model="assessType">
+        <el-radio value="3D-CAM">3D-CAM</el-radio>
+        <el-radio value="CAM-ICU" disabled>CAM-ICU</el-radio>
+      </el-radio-group>
+      <div>
+        <el-button class="gotoStartAssess-btn" type="primary" @click="gotoStartAssess">确定</el-button>
+      </div>
+      
+    </el-dialog>
   </div>
 </template>
 
@@ -62,6 +72,8 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
+const assessType = ref('3D-CAM')
+const isShowChooseAssess = ref(false)
 const project = ref({
   id: 'XM001',
   name: '项目A'
@@ -98,8 +110,11 @@ const assessMatrix = computed(() => {
   }
   return matrix
 })
-const gotoAssess = () => {
-  router.push({ path: '/startAssess', query: { patientId: patient.value.id } })
+const gotoStartAssess = () => {
+  router.push({
+    path: '/startAssess',
+    query: { assessType: assessType.value, patientId: patient.value.id }
+  })
 }
 const gotoRecord = (index, row) => {
   router.push({ path: '/recordResult', query: { recordId: row.id } })
@@ -108,8 +123,11 @@ const gotoRecord = (index, row) => {
 
 <style scoped lang="less">
 @matrix-unit-size: 20px;
+.patient-page {
+  padding: 32px;
+}
 .main {
-  margin: 32px;
+  margin-bottom: 32px;
   background-color: white;
   padding: 16px 32px;
   border-radius: 4px;
@@ -128,5 +146,9 @@ const gotoRecord = (index, row) => {
     height: @matrix-unit-size;
     cursor: pointer;
   }
+}
+.gotoStartAssess-btn {
+  width: 100%;
+  margin-top: 16px;
 }
 </style>

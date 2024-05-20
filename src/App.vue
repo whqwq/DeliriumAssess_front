@@ -32,6 +32,10 @@ window.addEventListener('resize', getPageSize)
   width: 100vw;
   min-height: 100vh;
   background-color: #f3f4f8;
+  /* position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%; */
 }
 ::-webkit-scrollbar {
   width: 0px;

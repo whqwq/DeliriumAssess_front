@@ -24,7 +24,7 @@
   height: @topbarHeight;
 }
 .topbar {
-  z-index: 1;
+  z-index: 10;
   background: linear-gradient(135deg, #404c70 0%, #1e253d 100%);
   width: 100%;
   height: @topbarHeight;

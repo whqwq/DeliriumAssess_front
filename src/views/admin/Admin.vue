@@ -151,8 +151,11 @@ watch(searchContent, searchCurUserTable, { deep: true, immediate: true })
 </script>
 
 <style lang="less" scoped>
+.admin-page {
+  padding: 32px;
+}
 .admin-main {
-  margin: 32px;
+  margin-bottom: 32px;
   background-color: white;
   padding: 16px 32px;
   border-radius: 4px;
