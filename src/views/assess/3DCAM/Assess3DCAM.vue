@@ -42,10 +42,28 @@
         请围绕某一主题（例如近期睡眠、疼痛、恶心呕吐、活动情况等）和患者进行3-5句简短对话。从中观察患者反应。
       </div>
       <div class="beginning-btn-container inner-center">
-        <el-button class="beginning-btn" size="large" type="primary" @click="finishBeginning">
+        <el-button
+          class="beginning-btn"
+          size="large"
+          type="primary"
+          @click="isShowBeginning = false"
+        >
           已完成
         </el-button>
       </div>
+    </el-dialog>
+    <el-dialog
+      v-model="isShowEnding"
+      style="min-width: 250px"
+      :show-close="false"
+      :before-close="() => {}"
+    >
+      <el-result icon="success" title="评估已完成" sub-title="谢谢配合">
+        <template #extra>
+          <el-button @click="goBack" class="end-btn">返回</el-button>
+          <el-button type="primary" class="end-btn" @click="gotoRecordResult">查看评估结果</el-button>
+        </template>
+      </el-result>
     </el-dialog>
   </div>
 </template>
@@ -65,7 +83,6 @@ const route = useRoute()
 const router = useRouter()
 
 const curPageIndex = ref(0)
-const curPage = computed(() => assessPages[curPageIndex.value])
 
 const assessPages_ = ref(assessPages)
 assessPages_.value.forEach((ap) => {
@@ -79,9 +96,7 @@ assessPages_.value.forEach((ap) => {
 })
 
 const isShowBeginning = ref(false)
-const finishBeginning = () => {
-  isShowBeginning.value = false
-}
+const isShowEnding = ref(false)
 
 const tmpSave = () => {
   const qgs = assessPages_.value[curPageIndex.value].questionGroups
@@ -93,6 +108,7 @@ const curPageQAs = computed(() => {
   const qanswers = qgroups.map((qg) => qg.answers).flat()
   return qanswers
 })
+
 const handleCurQAsFinished = () => {
   for (const qa of curPageQAs.value) {
     const answer = qa
@@ -111,18 +127,27 @@ const turnPage = (i) => {
   curPageIndex.value = i
 }
 const trySubmit = () => {
+  isShowEnding.value = true
+  return
   commonStore.loadding = true
   for (let i = 0; i < steps.value.length; i++) {
     if (!steps.value[i].finished) {
       commonStore.loadding = false
       curPageIndex.value = i
-      ElMessageBox.alert('当前页中存在题目未填写完整', {confirmButtonText: '我知道了'})
+      ElMessageBox.alert('当前页中存在题目未填写完整', { confirmButtonText: '我知道了' })
       return
     }
   }
 }
+
+const goBack = () => {
+  router.go(-1)
+}
+const gotoRecordResult = () => {
+  router.push({ path: '/recordResult', query: {} })
+}
 onMounted(() => {
-  // isShowBeginning.value = true
+  isShowBeginning.value = true
 })
 </script>
 
@@ -145,6 +170,9 @@ onMounted(() => {
       width: 250px;
     }
   }
+}
+.end-btn {
+  width: 100px;
 }
 .assess-3DCAM {
   padding: 32px;

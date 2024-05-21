@@ -1,20 +1,25 @@
 <template>
-  <div class="assess-header">
-    <el-icon @click="goBack"><Back /></el-icon>
-    <el-divider direction="vertical" />
-    <div class="assess-header-steps-container">
-      <template v-for="(s, i) in steps">
-        <el-icon v-if="i"><ArrowRight /></el-icon>
-        <div :class="['assess-step', { 'assess-step-finished': s.finished }]" @click="turnPage(i)">
-          <el-icon v-if="s.finished"><Checked /></el-icon>
-          <el-icon v-else><List /></el-icon>
-          <span :class="['assess-step-text', { 'assess-step-selected': i === curPageIndex }]">
-            {{ s.text }}
-          </span>
-        </div>
-      </template>
+  <div class="assess-header-container">
+    <div class="assess-header">
+      <el-icon @click="goBack" style="cursor: pointer;"><Back /></el-icon>
+      <el-divider direction="vertical" />
+      <div v-if="steps && steps.length" class="assess-header-steps-container">
+        <template v-for="(s, i) in steps">
+          <el-icon v-if="i"><ArrowRight /></el-icon>
+          <div
+            :class="['assess-step', { 'assess-step-finished': s.finished }]"
+            @click="turnPage(i)"
+          >
+            <el-icon v-if="s.finished"><Checked /></el-icon>
+            <el-icon v-else><List /></el-icon>
+            <span :class="['assess-step-text', { 'assess-step-selected': i === curPageIndex }]">
+              {{ s.text }}
+            </span>
+          </div>
+        </template>
+      </div>
+      <el-button class="submit-btn" plain @click="trySubmit">提交量表</el-button>
     </div>
-    <el-button plain @click="trySubmit">提交量表</el-button>
   </div>
 </template>
 
@@ -26,7 +31,7 @@ const props = defineProps(['steps']) //  steps: [{text:'stepA', finished:true}]
 const emit = defineEmits(['trySubmit'])
 const curPageIndex = defineModel()
 const goBack = () => {
-  router.push(-1)
+  router.go(-1)
 }
 const turnPage = (i) => {
   curPageIndex.value = i
@@ -35,15 +40,19 @@ const trySubmit = () => emit('trySubmit')
 </script>
 
 <style scoped lang="less">
-.assess-header {
+.assess-header-container {
   position: fixed;
   top: 0;
   left: 0;
   z-index: 10;
-  background: linear-gradient(135deg, #404c70 0%, #1e253d 100%);
-  width: 100%;
+  width: 100vw;
   height: var(--topbar-height);
-  font-size: calc(var(--topbar-height) / 1.8);
+}
+.assess-header {
+  width: 100vw;
+  height: var(--topbar-height);
+  background: linear-gradient(135deg, #404c70 0%, #1e253d 100%);
+  font-size: calc(var(--topbar-height) / 2);
   color: white;
   display: flex;
   align-items: center;
@@ -72,6 +81,9 @@ const trySubmit = () => emit('trySubmit')
       font-size: 18px;
       font-weight: 500;
     }
+  }
+  .submit-btn {
+    float: right;
   }
 }
 </style>

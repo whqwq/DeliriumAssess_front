@@ -86,12 +86,14 @@ watch(questionsAnswers, debounce(handleQuestionsAnswersChange, 1000), {
     justify-content: center;
   }
   .group-dialog {
+    width: 100%;
   }
   .group-tips {
     color: #666;
     font-size: 14px;
   }
   .questions {
+    width: 100%;
   }
   .question-content {
     font-size: 18px;
@@ -104,6 +106,7 @@ watch(questionsAnswers, debounce(handleQuestionsAnswersChange, 1000), {
     }
   }
   .question-answer-container {
+    width: 100%;
   }
 }
 </style>
