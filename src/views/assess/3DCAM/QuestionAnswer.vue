@@ -2,13 +2,14 @@
   <div class="question-answer">
     <el-radio-group v-model="answerChoice">
       <div class="answer-radioline" v-for="c in choices">
-        <el-radio :value="c.text">{{ c.text }}</el-radio>
+        <el-radio size="large" :value="c.text">{{ c.text }}</el-radio>
         <el-input
           class="radio-input"
           type="textarea"
           :autosize="{ minRows: 1 }"
           v-if="c.needInput && answerChoice === c.text"
-          v-model="answerInput"
+          v-model="answer.input"
+          placeholder="请按提示将具体内容填写完整"
         />
       </div>
     </el-radio-group>
@@ -16,20 +17,20 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, watch } from 'vue'
-const props = defineProps(['choices', 'questionIndex'])
-const emit = defineEmits(['choiceChange'])
-const questionIndex = props.questionIndex
-const choices = props.choices
-const choiceTextValueMap = {}
-choices.forEach((c) => {
-  choiceTextValueMap[c.text] = c.value
-})
+import { getChoiceMap } from './3DCAM.js'
+import { ref, defineEmits, watch, computed, defineModel } from 'vue'
+const props = defineProps(['choices'])
+
+const choiceTextValueMap = getChoiceMap(props.choices, 'text', 'value')
+const choiceTextNeedInputMap = getChoiceMap(props.choices, 'text', 'needInput')
 const answerChoice = ref(null)
-const answerInput = ref('')
+
+const answer = defineModel()
 const handleChoiceChange = (choice) => {
-  const choiceValue = choiceTextValueMap[choice]
-  emit('choiceChange', choiceValue, questionIndex)
+  answer.value.input = ''
+  answer.value.choice = choice
+  answer.value.value = choiceTextValueMap[choice]
+  answer.value.needInput = choiceTextNeedInputMap[choice]
 }
 watch(answerChoice, handleChoiceChange)
 </script>
@@ -40,6 +41,7 @@ watch(answerChoice, handleChoiceChange)
 }
 .answer-radioline {
   display: flex;
+  align-items: center;
 }
 .radio-input {
   max-width: 65%;

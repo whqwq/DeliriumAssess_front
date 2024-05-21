@@ -1,9 +1,19 @@
+import QuestionGroup from './QuestionGroup.vue'
+
 export const QUESTION_VISIT = 0
 export const QUESTION_OBSERVE = 1
 
-const weekDays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
-const getCurYear = () => (new Date()).getFullYear()
-const getCurWeekDay = () => weekDays[(new Date()).getDay()]
+export const getChoiceMap = (choices, source, target) => {
+  const map = {}
+  for (let c of (choices || [])) {
+    map[c[source]] = c[target]
+  }
+  return map
+}
+
+const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+const getCurYear = () => new Date().getFullYear()
+const getCurWeekDay = () => weekDays[new Date().getDay()]
 
 const choicesList = []
 choicesList[0] = [
@@ -49,7 +59,7 @@ export const visitQuestionGroups = [
     tips: '',
     choices: choicesList[0], // 此题目组有统一的回答选项;具体题目也可以单独设置选项
     questions: [
-      { i: '1', content: '请告诉我现在是哪一年', answerTips: getCurYear()+'年' },
+      { i: '1', content: '请告诉我现在是哪一年', answerTips: getCurYear() + '年' },
       { i: '2', content: '请告诉我今天是星期几', answerTips: getCurWeekDay() },
       { i: '3', content: '请告诉我这是什么地方', answerTips: '答出“医院”即可' }
     ],
@@ -61,8 +71,8 @@ export const visitQuestionGroups = [
     tips: '按照每秒1个数字的速度读出，数列最多重复一次。',
     choices: choicesList[1],
     questions: [
-      { i: '4', content: '倒叙7-5-1', answerTips: '逆序：1-5-7' },
-      { i: '5', content: '倒叙8-2-4-3', answerTips: '逆序：3-4-2-8' }
+      { i: '4', content: '倒叙 7-5-1', answerTips: '逆序：1-5-7' },
+      { i: '5', content: '倒叙 8-2-4-3', answerTips: '逆序：3-4-2-8' }
     ],
     feature: 2
   },
@@ -85,11 +95,11 @@ export const visitQuestionGroups = [
     tips: '注意：可以提示“再减去3等于多少”，而不要主动提示“17/14/11减去3等于多少？”；当受试者停在X，可以提示“X提减去3等于多少？，但只能提示1次。',
     choices: choicesList[1],
     questions: [
-      { i: '7A', content: '20-3', answerTips: '17' },
-      { i: '7B', content: '17-3', answerTips: '14' },
-      { i: '7C', content: '14-3', answerTips: '11' },
-      { i: '7D', content: '11-3', answerTips: '8' },
-      { i: '7E', content: '8-3', answerTips: '5' }
+      { i: '7A', content: '计算 20-3', answerTips: '17' },
+      { i: '7B', content: '计算 17-3', answerTips: '14' },
+      { i: '7C', content: '计算 14-3', answerTips: '11' },
+      { i: '7D', content: '计算 11-3', answerTips: '8' },
+      { i: '7E', content: '计算 8-3', answerTips: '5' }
     ],
     feature: 2
   },
@@ -118,7 +128,8 @@ export const visitQuestionGroups = [
       },
       {
         i: '21',
-        content:'请查询病历或者联系了解患者情况的家属、朋友或护理人员，了解：在过去24小时，患者的记忆力或思维是否有急性改变？（如糊涂、幻觉、思维混乱）',
+        content:
+          '请查询病历或者联系了解患者情况的家属、朋友或护理人员，了解：在过去24小时，患者的记忆力或思维是否有急性改变？（如糊涂、幻觉、思维混乱）',
         choices: choicesList[4],
         isExtra: true
       }
@@ -128,6 +139,8 @@ export const visitQuestionGroups = [
 ]
 export const observeQuestionGroups = [
   {
+    title: '观察评估',
+    tips: '访视部分已结束，下面请完成评估者观察内容并选择相应选项。',
     choices: choicesList[5],
     questions: [
       {
@@ -205,4 +218,11 @@ export const observeQuestionGroups = [
     ],
     feature: 1
   }
+]
+
+export const assessPages = [
+  { part: '访视部分', instruction: '定向力', questionGroups: [visitQuestionGroups[0]] },
+  { part: '访视部分', instruction: '倒数/计算', questionGroups: visitQuestionGroups.slice(1, 4) },
+  { part: '访视部分', instruction: '主诉症状', questionGroups: [visitQuestionGroups[4]] },
+  { part: '观察部分', instruction: '观察评估', questionGroups: observeQuestionGroups }
 ]

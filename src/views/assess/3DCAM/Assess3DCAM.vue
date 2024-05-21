@@ -1,8 +1,32 @@
 <template>
   <div class="assess-3DCAM">
-    <div class="assess-content">
-			<QuestionGroup v-for="qg in visitQuestionGroups" :questionGroup="qg" />
-		</div>
+    <!-- Header -->
+    <AssessHeader v-model="curPageIndex" :steps="steps" @trySubmit="trySubmit" />
+    <!-- assess pages -->
+    <template v-for="(ap, api) in assessPages_">
+      <div class="assess-page" v-show="curPageIndex === api">
+        <div class="assess-page-part">{{ ap.part }}</div>
+        <div class="assess-page-quesitonGroups">
+          <QuestionGroup v-for="qg in ap.questionGroups" :questionGroup="qg" v-model="qg.answers" />
+        </div>
+        <div class="assess-page-btn-container inner-center">
+          <el-button class="assess-page-btn" type="info" plain round size="large" @click="tmpSave()"
+            >暂存</el-button
+          >
+        </div>
+      </div>
+    </template>
+    <div class="turn-btn turn-btn-left" @click="turnPage(curPageIndex - 1)" v-if="curPageIndex > 0">
+      <el-icon><ArrowLeftBold /></el-icon>
+    </div>
+    <div
+      class="turn-btn turn-btn-right"
+      @click="turnPage(curPageIndex + 1)"
+      v-if="curPageIndex < assessPages.length - 1"
+    >
+      <el-icon><ArrowRightBold /></el-icon>
+    </div>
+    <!-- dialog where assess begin -->
     <el-dialog
       class="beginning"
       style="min-width: 250px"
@@ -27,29 +51,83 @@
 </template>
 
 <script setup>
+import { debounce } from 'lodash'
+import { ElMessageBox } from 'element-plus'
+import AssessHeader from '../AssessHeader.vue'
 import QuestionGroup from './QuestionGroup.vue'
-import { visitQuestionGroups, observeQuestionGroups } from './3DCAM.js'
-import { ref, computed, onMounted } from 'vue'
+import { assessPages } from './3DCAM.js'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCommonStore } from '@/stores/common.js'
+
+const commonStore = useCommonStore()
 const route = useRoute()
 const router = useRouter()
-const patient = ref({
-  id: route.query.patientId,
-  idInProject: '001',
-  alpha: 'W'
+
+const curPageIndex = ref(0)
+const curPage = computed(() => assessPages[curPageIndex.value])
+
+const assessPages_ = ref(assessPages)
+assessPages_.value.forEach((ap) => {
+  ap.questionGroups.forEach((qg) => {
+    qg.answers = []
+    qg.questions.forEach((q) => {
+      q.choices = q.choices || qg.choices
+      q.answer = { choice: '', value: false, input: '', needInput: false }
+    })
+  })
 })
-const assessType = ref(route.query.assessType)
+
 const isShowBeginning = ref(false)
 const finishBeginning = () => {
   isShowBeginning.value = false
 }
 
+const tmpSave = () => {
+  const qgs = assessPages_.value[curPageIndex.value].questionGroups
+  console.log(qgs.map((qg) => qg.answers).flat())
+}
+
+const curPageQAs = computed(() => {
+  const qgroups = assessPages_.value[curPageIndex.value].questionGroups
+  const qanswers = qgroups.map((qg) => qg.answers).flat()
+  return qanswers
+})
+const handleCurQAsFinished = () => {
+  for (const qa of curPageQAs.value) {
+    const answer = qa
+    if (!answer.choice || (!answer.input && answer.needInput)) {
+      steps.value[curPageIndex.value].finished = false
+      return
+    }
+  }
+  steps.value[curPageIndex.value].finished = true
+}
+watch(curPageQAs, debounce(handleCurQAsFinished, 1000), { deep: true })
+
+const steps = ref(assessPages.map((ap) => ({ text: ap.instruction, finished: false })))
+
+const turnPage = (i) => {
+  curPageIndex.value = i
+}
+const trySubmit = () => {
+  commonStore.loadding = true
+  for (let i = 0; i < steps.value.length; i++) {
+    if (!steps.value[i].finished) {
+      commonStore.loadding = false
+      curPageIndex.value = i
+      ElMessageBox.alert('当前页中存在题目未填写完整', {confirmButtonText: '我知道了'})
+      return
+    }
+  }
+}
 onMounted(() => {
   // isShowBeginning.value = true
 })
 </script>
 
 <style scoped lang="less">
+@turn-icon-space: 14px;
 .inner-center {
   display: flex;
   justify-content: center;
@@ -65,6 +143,77 @@ onMounted(() => {
     .beginning-btn {
       max-width: 100%;
       width: 250px;
+    }
+  }
+}
+.assess-3DCAM {
+  padding: 32px;
+  padding-top: calc(32px + var(--topbar-height));
+}
+.assess-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #404c70 0%, #1e253d 100%);
+  width: 100%;
+  height: var(--topbar-height);
+  font-size: calc(var(--topbar-height) / 1.8);
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  .assess-header-steps-container {
+    width: 100%;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+}
+.assess-page {
+  margin: 8px;
+  padding: 32px;
+  border-radius: 4px;
+  background-color: white;
+  line-height: 1.5;
+  .assess-page-part {
+    color: #666;
+    display: flex;
+    justify-content: right;
+  }
+  .assess-page-btn-container {
+    width: 100%;
+    margin: 16px 0;
+    .assess-page-btn {
+      max-width: 100%;
+      width: 260px;
+      font-weight: 600;
+      border-width: 2px;
+    }
+  }
+  .turn-btn {
+    position: fixed;
+    top: 50%;
+    translate: 0 -50%;
+    scale: 1 1.6;
+    font-size: 22px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.25s linear;
+    &:hover {
+      color: #409eef;
+    }
+  }
+  .turn-btn-left {
+    left: @turn-icon-space;
+    &:hover {
+      translate: -5px -50%;
+    }
+  }
+  .turn-btn-right {
+    right: @turn-icon-space;
+    &:hover {
+      translate: 5px -50%;
     }
   }
 }

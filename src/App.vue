@@ -26,6 +26,7 @@ window.addEventListener('resize', getPageSize)
 }
 :root {
   --mobile-width: 830px;
+  --topbar-height: 56px;
 }
 #app {
   margin: 0;

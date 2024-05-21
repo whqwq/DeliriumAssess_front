@@ -18,16 +18,15 @@
 </script>
 
 <style scoped lang="less">
-@topbarHeight: 56px;
 .topbar-space {
   width: 100%;
-  height: @topbarHeight;
+  height: var(--topbar-height);
 }
 .topbar {
   z-index: 10;
   background: linear-gradient(135deg, #404c70 0%, #1e253d 100%);
   width: 100%;
-  height: @topbarHeight;
+  height: var(--topbar-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
