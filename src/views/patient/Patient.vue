@@ -44,7 +44,7 @@
         <el-table-column prop="scale" label="评估量表"></el-table-column>
         <el-table-column prop="date" label="评估日期" sortable></el-table-column>
         <el-table-column prop="assessor" label="评估者"></el-table-column>
-        <el-table-column fixed="right" label="操作">
+        <el-table-column label="操作">
           <template #default="scope">
             <el-button size="small" @click="gotoRecord(scope.$index, scope.row)"> 查看 </el-button>
           </template></el-table-column

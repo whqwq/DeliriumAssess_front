@@ -14,11 +14,11 @@
       />
     </div>
     <el-table :data="memberTable" class="projectMember-table">
-      <el-table-column fixed prop="name" label="姓名"></el-table-column>
-      <el-table-column fixed prop="phone" label="电话"></el-table-column>
+      <el-table-column prop="name" label="姓名"></el-table-column>
+      <el-table-column prop="phone" label="电话"></el-table-column>
       <el-table-column prop="hospital" label="医院"></el-table-column>
       <el-table-column prop="status" label="权限"></el-table-column>
-      <el-table-column fixed="right" label="操作">
+      <el-table-column label="操作">
         <template #default="scope">
           <el-button
             size="small"

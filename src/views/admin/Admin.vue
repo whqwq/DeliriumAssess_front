@@ -12,10 +12,10 @@
         />
       </div>
       <el-table :data="userTable" class="admin-table">
-        <el-table-column fixed prop="name" label="姓名"></el-table-column>
+        <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="phone" label="电话"></el-table-column>
         <el-table-column prop="hospital" label="医院"></el-table-column>
-        <el-table-column fixed="right" label="操作" width="300">
+        <el-table-column label="操作" width="240">
           <template #default="scope">
             <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
               >修改信息</el-button
