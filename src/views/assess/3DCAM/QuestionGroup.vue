@@ -6,29 +6,29 @@
     <div class="group-dialog" v-if="questionGroup.dialog">对话：{{ questionGroup.dialog }}</div>
     <div class="group-tips" v-if="questionGroup.tips">提示：{{ questionGroup.tips }}</div>
     <div class="questions">
-      <div v-for="q in questionGroup.questions">
-        <div v-show="!q.isExtra || isShowExtra">
+      <div v-for="qa in questionGroup.QAs">
+        <div v-show="!qa.question.isExtra || isShowExtra">
           <el-divider />
           <div class="question-content">
-            <template v-if="q.answerTips">
-              <el-popover placement="top" trigger="click" :content="q.answerTips">
+            <template v-if="qa.question.answerTips">
+              <el-popover placement="top" trigger="click" :content="qa.question.answerTips">
                 <template #reference>
                   <span>
-                    <span class="question-content-number">{{ q.i + '. ' }}</span>
-                    {{ q.content }}
+                    <span class="question-content-number">{{ qa.question.i + '. ' }}</span>
+                    {{ qa.question.content }}
                   </span>
                 </template>
               </el-popover>
             </template>
             <template v-else>
               <span>
-                <span class="question-content-number">{{ q.i + '. ' }}</span>
-                {{ q.content }}
+                <span class="question-content-number">{{ qa.question.i + '. ' }}</span>
+                {{ qa.question.content }}
               </span>
             </template>
           </div>
           <div class="question-answer-container">
-            <QuestionAnswer v-model="q.answer" :choices="q.choices" />
+            <QuestionAnswer v-model="qa.answer" :choices="qa.question.choices" />
           </div>
         </div>
       </div>
@@ -37,36 +37,24 @@
 </template>
 
 <script setup>
-import { debounce } from 'lodash'
 import QuestionAnswer from './QuestionAnswer.vue'
-import { ref, computed, defineModel, watch } from 'vue'
+import { computed, defineModel } from 'vue'
 const props = defineProps(['questionGroup'])
 
+const QAs = defineModel()
 const isShowExtra = computed(() => {
-  const q = props.questionGroup.questions
-  for (let i = 0; i < q.length; i++) {
-    if (!q[i].isExtra && !q[i].answer.value) {
-      return false
+  let showFlag = true
+  const qas = props.questionGroup.QAs
+  for (let i = 0; i < qas.length; i++) {
+    if (!qas[i].question.isExtra && !qas[i].answer.value) {
+      showFlag = false
+      break
     }
   }
-  return true
-})
-
-const answers = defineModel()
-const questionsAnswers = computed(() => {
-  const qas = []
-  for (const q of props.questionGroup.questions) {
-    if (!q.isExtra || (q.isExtra && isShowExtra.value))
-      qas.push({ ...q.answer, i: q.i, content: q.content })
-  }
-  return qas
-})
-const handleQuestionsAnswersChange = () => {
-  answers.value = questionsAnswers.value
-}
-watch(questionsAnswers, debounce(handleQuestionsAnswersChange, 1000), {
-  deep: true,
-  immediate: true
+  QAs.value.forEach((qa) => {
+    if (qa.question.i === '21' && qa.isHide === showFlag) qa.isHide = !showFlag
+  })
+  return showFlag
 })
 </script>
 

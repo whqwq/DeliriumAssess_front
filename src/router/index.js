@@ -39,14 +39,14 @@ const router = createRouter({
       component: () => import('@/views/assess/StartAssess.vue')
     },
     {
-      path: '/recordResult',
-      name: 'recordResult',
-      component: () => import('@/views/record/RecordResult.vue')
+      path: '/assessmentResult',
+      name: 'assessmentResult',
+      component: () => import('@/views/assessment/AssessmentResult.vue')
     },
     {
       path: '/recordDetails',
       name: 'recordDetails',
-      component: () => import('@/views/record/RecordDetails.vue')
+      component: () => import('@/views/assessment/RecordDetails.vue')
     }
   ]
 })

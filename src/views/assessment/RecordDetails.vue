@@ -7,11 +7,11 @@
         <div class="title">{{ record.assessType }}评估记录详情</div>
         <div class="subtitle">
           <span>受试者：{{ record.patient.idInProejct }}</span>
-          <span>{{ record.recordTime }}</span>
+          <span>记录生成时间：{{ record.editTime }}</span>
         </div>
       </div>
-      <div class="QAs">
-        <div v-for="(qa, qai) in record.QAs">
+      <div v-for="(qa, qai) in record.QAs">
+        <div class="QA" v-if="!qa.isHide">
           <el-divider />
           <div class="question-container">
             <div class="question">
@@ -19,14 +19,14 @@
                 <span class="question-number">{{ qa.question.i + '. ' }}</span>
                 {{ qa.question.content }}
               </span>
-              <span>
+              <span v-if="record.isRecent">
                 <el-button
                   class="change-btn"
                   plain
                   @click="unLockAnswer(qai)"
-                  :disabled="!qa.locked"
+                  :disabled="!recordLockList[qai]"
                 >
-                  <span v-if="qa.locked">修改该题记录</span>
+                  <span v-if="recordLockList[qai]">修改该题记录</span>
                   <span v-else>正在修改该题</span>
                 </el-button>
               </span>
@@ -36,7 +36,7 @@
             <QuestionAnswer
               v-model="qa.answer"
               :choices="qa.question.choices"
-              :locked="qa.locked"
+              :locked="recordLockList[qai]"
             />
           </div>
         </div>
@@ -63,25 +63,49 @@
 import QuestionAnswer from '../assess/3DCAM/QuestionAnswer.vue'
 import Topbar from '@/components/system/Topbar.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { templateRecordDetails } from './const.js'
-import { ref } from 'vue'
+import { getFakeRecordDetails } from './const.js'
+import { ref, watch, onMounted, computed } from 'vue'
+import { debounce } from 'lodash'
+
 const route = useRoute()
 const router = useRouter()
-const recordRaw = ref(templateRecordDetails)
-recordRaw.value.QAs.forEach((qa) => {
-  qa.locked = true
-})
-const record = ref(templateRecordDetails)
 const showSubmitBtn = ref(false)
+
+const recordRaw = ref(getFakeRecordDetails())
+const record = ref({
+  patient: {},
+  assessor: {},
+  QAs: []
+})
+const recordLockList = ref([])
+
+const recordQAs = computed(() => record.value.QAs || [])
+
+const checkQAHide = (newQAs) => {
+  const tmpQAs = newQAs.filter((qa) => ['8', '9', '10'].includes(qa.question.i))
+  const isHide = tmpQAs.some((qa) => !qa.answer.value)
+  record.value.QAs.forEach((qa) => {
+    if (qa.question.i === '21' && qa.isHide !== isHide) qa.isHide = isHide
+  })
+}
+
 const unLockAnswer = (idx) => {
   showSubmitBtn.value = true
-  record.value.QAs[idx].locked = false
+  recordLockList.value[idx] = false
 }
 const reset = () => {
-	console.log(recordRaw.value);
   record.value = recordRaw.value
+  recordLockList.value = new Array(recordRaw.value.QAs.length).fill(true)
+  showSubmitBtn.value = false
 }
 const trySubmit = () => {}
+onMounted(() => {
+  recordRaw.value = getFakeRecordDetails()
+  reset()
+  if (record.value.assessType === '3D-CAM') {
+    watch(recordQAs, debounce(checkQAHide, 1000), { deep: true })
+  }
+})
 </script>
 
 <style scoped lang="less">
@@ -110,8 +134,7 @@ const trySubmit = () => {}
     }
   }
 }
-.QAs {
-  width: 100%;
+.QA {
   .question-container {
     width: 100%;
     font-size: 18px;

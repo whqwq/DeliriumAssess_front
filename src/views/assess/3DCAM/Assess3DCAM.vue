@@ -3,11 +3,11 @@
     <!-- Header -->
     <AssessHeader v-model="curPageIndex" :steps="steps" @trySubmit="trySubmit" />
     <!-- assess pages -->
-    <template v-for="(ap, api) in assessPages_">
+    <template v-for="(ap, api) in assessPages">
       <div class="assess-page" v-show="curPageIndex === api">
         <div class="assess-page-part">{{ ap.part }}</div>
         <div class="assess-page-quesitonGroups">
-          <QuestionGroup v-for="qg in ap.questionGroups" :questionGroup="qg" v-model="qg.answers" />
+          <QuestionGroup v-for="qg in ap.questionGroups" :questionGroup="qg" v-model="qg.QAs" />
         </div>
         <div class="assess-page-btn-container inner-center">
           <el-button class="assess-page-btn" type="info" plain round size="large" @click="tmpSave()"
@@ -16,6 +16,7 @@
         </div>
       </div>
     </template>
+    <!-- turn page btn -->
     <div class="turn-btn turn-btn-left" @click="turnPage(curPageIndex - 1)" v-if="curPageIndex > 0">
       <el-icon><ArrowLeftBold /></el-icon>
     </div>
@@ -52,6 +53,7 @@
         </el-button>
       </div>
     </el-dialog>
+    <!-- dialog after submit -->
     <el-dialog
       v-model="isShowEnding"
       style="min-width: 250px"
@@ -61,7 +63,9 @@
       <el-result icon="success" title="评估已完成" sub-title="谢谢配合">
         <template #extra>
           <el-button @click="goBack" class="end-btn">返回</el-button>
-          <el-button type="primary" class="end-btn" @click="gotoRecordResult">查看评估结果</el-button>
+          <el-button type="primary" class="end-btn" @click="gotoAssessmentResult"
+            >查看评估结果</el-button
+          >
         </template>
       </el-result>
     </el-dialog>
@@ -73,7 +77,7 @@ import { debounce } from 'lodash'
 import { ElMessageBox } from 'element-plus'
 import AssessHeader from '../AssessHeader.vue'
 import QuestionGroup from './QuestionGroup.vue'
-import { assessPages } from './3DCAM.js'
+import { getTemplateAssessPages } from './const.js'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCommonStore } from '@/stores/common.js'
@@ -82,67 +86,64 @@ const commonStore = useCommonStore()
 const route = useRoute()
 const router = useRouter()
 
-const curPageIndex = ref(0)
-
-const assessPages_ = ref(assessPages)
-assessPages_.value.forEach((ap) => {
-  ap.questionGroups.forEach((qg) => {
-    qg.answers = []
-    qg.questions.forEach((q) => {
-      q.choices = q.choices || qg.choices
-      q.answer = { choice: '', value: false, input: '', needInput: false }
-    })
-  })
-})
-
 const isShowBeginning = ref(false)
 const isShowEnding = ref(false)
 
-const tmpSave = () => {
-  const qgs = assessPages_.value[curPageIndex.value].questionGroups
-  console.log(qgs.map((qg) => qg.answers).flat())
-}
+const assessPages = ref(getTemplateAssessPages())
+const steps = ref(assessPages.value.map((ap) => ({ text: ap.instruction, finished: false })))
+const curPageIndex = ref(0)
 
+const curPage = computed(() => assessPages.value[curPageIndex.value])
 const curPageQAs = computed(() => {
-  const qgroups = assessPages_.value[curPageIndex.value].questionGroups
-  const qanswers = qgroups.map((qg) => qg.answers).flat()
-  return qanswers
+  const qGroups = curPage.value.questionGroups || []
+  return qGroups.map((qg) => qg.QAs).flat()
 })
 
-const handleCurQAsFinished = () => {
-  for (const qa of curPageQAs.value) {
-    const answer = qa
+const checkCurQAsFinished = (newCurQAs) => {
+  for (let i = 0; i < newCurQAs.length; i++) {
+    const qa = newCurQAs[i]
+    if (qa.isHide) continue
+    const answer = qa.answer
     if (!answer.choice || (!answer.input && answer.needInput)) {
+      steps.value[curPageIndex.value].unFinishedQuestionId = qa.question.i
       steps.value[curPageIndex.value].finished = false
       return
     }
   }
   steps.value[curPageIndex.value].finished = true
 }
-watch(curPageQAs, debounce(handleCurQAsFinished, 1000), { deep: true })
-
-const steps = ref(assessPages.map((ap) => ({ text: ap.instruction, finished: false })))
+watch(curPageQAs, debounce(checkCurQAsFinished, 1000), { deep: true, immediate: true })
 
 const turnPage = (i) => {
   curPageIndex.value = i
 }
+
+const tmpSave = () => {
+  console.log(newCurQAs.filter((qa) => !qa.isHide))
+}
+
 const trySubmit = () => {
-  commonStore.loadding = true
+  commonStore.loading = true
   for (let i = 0; i < steps.value.length; i++) {
-    if (!steps.value[i].finished) {
-      commonStore.loadding = false
+    const st = steps.value[i]
+    if (!st.finished) {
+      commonStore.loading = false
       curPageIndex.value = i
-      ElMessageBox.alert('当前页中存在题目未填写完整', { confirmButtonText: '我知道了' })
+      ElMessageBox.alert(`量表【${st.text}】页中，题目【${st.unFinishedQuestionId}】未填写完整`, {
+        confirmButtonText: '我知道了'
+      })
       return
     }
   }
+  isShowEnding.value = true
+  commonStore.loading = false
 }
 
 const goBack = () => {
   router.go(-1)
 }
-const gotoRecordResult = () => {
-  router.push({ path: '/recordResult', query: {} })
+const gotoAssessmentResult = () => {
+  router.push({ path: '/assessmentResult', query: {assessmentId: '001'} })
 }
 onMounted(() => {
   isShowBeginning.value = true

@@ -40,13 +40,13 @@
     </div>
     <div class="main">
       <div class="main-title">患者历史评估记录</div>
-      <el-table :data="allRecordList">
+      <el-table :data="allAssessmentList">
         <el-table-column prop="scale" label="评估量表"></el-table-column>
         <el-table-column prop="date" label="评估日期" sortable></el-table-column>
         <el-table-column prop="assessor" label="评估者"></el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button size="small" @click="gotoRecord(scope.$index, scope.row)"> 查看 </el-button>
+            <el-button size="small" @click="gotoAssessment(scope.$index, scope.row)"> 查看 </el-button>
           </template></el-table-column
         >
       </el-table>
@@ -85,7 +85,7 @@ const patient = ref({
   hospital: '北医一院',
   operateDate: '2024-05-14'
 })
-const allRecordList = ref([
+const allAssessmentList = ref([
   { id: '1', scale: '3D-CAM', date: '2024-05-15', assessor: '王医生' },
   { id: '2', scale: '3D-CAM', date: '2024-05-17', assessor: 'A医生' }
 ])
@@ -100,7 +100,7 @@ const assessMatrix = computed(() => {
     if (tmpDate <= curDate) matrixMap[tmpDateString] = 0
     else matrixMap[tmpDateString] = -1
   }
-  for (const r of allRecordList.value) {
+  for (const r of allAssessmentList.value) {
     matrixMap[r.date] = 1
   }
   const matrix = []
@@ -116,8 +116,8 @@ const gotoStartAssess = () => {
     query: { assessType: assessType.value, patientId: patient.value.id }
   })
 }
-const gotoRecord = (index, row) => {
-  router.push({ path: '/recordResult', query: { recordId: row.id } })
+const gotoAssessment = (index, row) => {
+  router.push({ path: '/assessmentResult', query: { assessmentId: row.id } })
 }
 </script>
 

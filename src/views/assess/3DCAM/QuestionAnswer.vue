@@ -18,8 +18,8 @@
 </template>
 
 <script setup>
-import { getChoiceMap } from './3DCAM.js'
-import { ref, defineEmits, watch, computed, defineModel } from 'vue'
+import { getChoiceMap } from './const.js'
+import { ref, watch, defineModel } from 'vue'
 const props = defineProps(['choices', 'locked'])
 
 const choiceTextValueMap = getChoiceMap(props.choices, 'text', 'value')
