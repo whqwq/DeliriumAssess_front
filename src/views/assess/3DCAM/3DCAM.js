@@ -82,10 +82,10 @@ export const visitQuestionGroups = [
     tips: '可以提示：“冬季之前是哪个季节？；只能使用1次提示。注意：可以提示“再之前是哪个季节”，但是不要主动提示“冬/秋/夏季之前是哪个季节？”如果患者按照正序说出季节，请再次进行说明',
     choices: choicesList[1],
     questions: [
-      { i: '6A', content: '冬季', answerTips: '' },
-      { i: '6B', content: '秋季', answerTips: '' },
-      { i: '6C', content: '夏季', answerTips: '' },
-      { i: '6D', content: '春季', answerTips: '' }
+      { i: '6A', content: '倒数季节 冬季', answerTips: '' },
+      { i: '6B', content: '倒数季节 秋季', answerTips: '' },
+      { i: '6C', content: '倒数季节 夏季', answerTips: '' },
+      { i: '6D', content: '倒数季节 春季', answerTips: '' }
     ],
     feature: 2
   },

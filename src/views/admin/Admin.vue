@@ -1,6 +1,6 @@
 <template>
   <div class="admin-page">
-    <Topbar />
+    <Topbar :showBack="false"/>
     <div class="admin-main">
       <div class="header-line">
         <el-button type="primary" plain @click="isShowAddUser = true">新增用户</el-button>

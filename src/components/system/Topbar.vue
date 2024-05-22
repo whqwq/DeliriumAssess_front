@@ -1,9 +1,11 @@
 <template>
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-title">
-        谵妄评估系统
-      </div>
+      <template v-if="showBack">
+        <el-icon @click="goBack" style="cursor: pointer"><Back /></el-icon>
+        <el-divider direction="vertical" />
+      </template>
+      <div class="topbar-title" v-if="showLogo">谵妄评估系统</div>
     </div>
     <div class="topbar-right">
       <div class="topbar-avatar">
@@ -15,6 +17,15 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const props = defineProps({
+  showBack: { default: true },
+  showLogo: { default: true }
+})
+const goBack = () => {
+  router.go(-1)
+}
 </script>
 
 <style scoped lang="less">
@@ -36,25 +47,32 @@
   width: 100vw;
   box-shadow: 0 1px 4px gray;
   padding: 0 16px;
+  font-size: calc(var(--topbar-height) / 2);
+  color: white;
+  line-height: var(--topbar-height);
   .topbar-left {
+    display: flex;
+    align-items: center;
     .topbar-title {
-      color: #fff;
-      font-size: 20px;
+      text-align: center;
+      // font-size: 20px;
       &::before {
         vertical-align: middle;
         content: '';
         display: inline-block;
-        width: 20px;
-        height: 20px;
+        width: calc(var(--topbar-height) / 2);
+        height: calc(var(--topbar-height) / 2);
         background: url('../../assets/img/logo.png') no-repeat;
         background-size: 100%;
-        margin-right: 10px;
+        margin: 0 10px;
       }
     }
   }
   .topbar-right {
     .topbar-avatar {
-      cursor: default;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
     }
   }
 }

@@ -127,8 +127,6 @@ const turnPage = (i) => {
   curPageIndex.value = i
 }
 const trySubmit = () => {
-  isShowEnding.value = true
-  return
   commonStore.loadding = true
   for (let i = 0; i < steps.value.length; i++) {
     if (!steps.value[i].finished) {

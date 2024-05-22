@@ -94,19 +94,19 @@ watch(questionsAnswers, debounce(handleQuestionsAnswersChange, 1000), {
   }
   .questions {
     width: 100%;
-  }
-  .question-content {
-    font-size: 18px;
-    margin: 8px 0;
-    cursor: default;
-    font-weight: 500;
-    &-number {
-      font-size: 15px;
-      margin-right: 4px;
+    .question-content {
+      font-size: 18px;
+      margin: 8px 0;
+      cursor: default;
+      font-weight: 500;
+      &-number {
+        font-size: 15px;
+        margin-right: 4px;
+      }
     }
-  }
-  .question-answer-container {
-    width: 100%;
+    .question-answer-container {
+      width: 100%;
+    }
   }
 }
 </style>

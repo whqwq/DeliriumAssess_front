@@ -1,5 +1,6 @@
 <template>
   <div class="startAssess">
+    <Topbar />
     <div class="start-main">
       <div class="startAssess-header">
         <div class="inner-center assess-type">{{ assessType }}谵妄评估</div>
@@ -15,6 +16,9 @@
     <div class="start-main">
       <div class="main-title">请阅读并勾选以下每一条注意事项：</div>
       <div class="startAssess-checkList">
+        <el-checkbox @change="changeAllCheck">
+          <span style="font-weight: bold;">全选</span>
+        </el-checkbox>
         <el-checkbox-group v-model="assessTipsChecks">
           <div v-for="(t, idx) in assessTips">
             <el-checkbox :label="t" :value="idx" />
@@ -31,6 +35,7 @@
 </template>
 
 <script setup>
+import Topbar from '@/components/system/Topbar.vue'
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
@@ -52,6 +57,15 @@ const assessTips = ref([
 ])
 const assessTipsChecks = ref([])
 const isShowBtn = computed(() => assessTips.value.length === assessTipsChecks.value.length)
+const changeAllCheck = (val) => {
+  const len = assessTips.value.length
+  if (val) {
+    assessTipsChecks.value = []
+    for (let i = 0; i < len; i++) assessTipsChecks.value.push(i)
+    return
+  }
+  assessTipsChecks.value = []
+}
 const gotoAssess = () => {
   router.push({
     path: '/assess',

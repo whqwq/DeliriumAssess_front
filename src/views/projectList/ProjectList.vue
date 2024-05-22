@@ -1,6 +1,6 @@
 <template>
   <div class="projectList">
-    <Topbar />
+    <Topbar :showBack="false"/>
     <div class="projectList-main">
       <div class="header-line">
         <el-button type="primary" plain @click="isShowCreateProject = true">新建项目</el-button>
