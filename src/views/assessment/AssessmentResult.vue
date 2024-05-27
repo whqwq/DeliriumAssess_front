@@ -21,9 +21,10 @@
       </el-descriptions>
     </div>
     <div class="result-main">
+      <div class="result-main-title inner-center">谵妄评估：{{ assessResultSum }}</div>
       <div class="result-main-table-container">
         <el-table :data="record.assessResults" border style="width: 100%">
-          <el-table-column prop="positive" label="当前评估结果">
+          <el-table-column prop="positive" label="评估结果细则">
             <template #default="scope">
               <el-tag type="danger" v-if="scope.row.positive">阳性</el-tag>
               <el-tag type="success" v-else>阴性</el-tag>
@@ -70,7 +71,7 @@
 <script setup>
 import { featureDescriptionMap, getFakeRecord } from './const.js'
 import Topbar from '@/components/system/Topbar.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
@@ -101,6 +102,10 @@ const recordHistory = ref([
     status: -1
   }
 ])
+const assessResultSum = computed(() => {
+  const positives = record.value.assessResults.map(r => r.positive)
+  return positives[0] && positives[1] && (positives[2] || positives[3]) ? '阳性' : '阴性'
+})
 const gotoRecordDetails = (recordId) => {
   router.push({ path: '/recordDetails', query: { recordId } })
 }
@@ -121,7 +126,13 @@ const gotoRecordDetails = (recordId) => {
     margin-bottom: 32px;
     background-color: white;
     border-radius: 4px;
-    .result-main-tabel-container {
+    .result-main-title {
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .result-main-table-container {
       width: 100%;
     }
   }
