@@ -21,7 +21,7 @@
       ></el-table-column>
       <el-table-column label="操作" width="140">
         <template #default="scope">
-          <el-button size="small" @click="gotoPatient(scope.$index, scope.row)">查看</el-button>
+          <el-button size="small" @click="gotoPatient(scope.$index, scope.row)">进入评估</el-button>
           <el-button
             size="small"
             type="danger"
