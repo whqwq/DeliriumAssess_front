@@ -8,20 +8,20 @@
           <el-button type="success" @click="createProjectVisible = true">创建项目</el-button>
         </div>
         <el-input
-          v-model="searchContent"
+          v-model="searchUserText"
           placeholder="搜索用户"
           :prefix-icon="Search"
           class="search-input"
         />
       </div>
-      <el-table :data="userTable" class="admin-table">
+      <el-table :data="curUserList" class="admin-table">
         <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="phone" label="电话"></el-table-column>
         <el-table-column prop="hospital" label="医院"></el-table-column>
         <el-table-column prop="createDate" label="创建日期"></el-table-column>
         <el-table-column label="操作" width="240">
           <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
+            <el-button size="small" @click="handleEditUser(scope.$index, scope.row)"
               >修改信息</el-button
             >
             <el-button size="small" @click="handleResetPwd(scope.$index, scope.row)"
@@ -65,7 +65,7 @@
             :autosize="{ minRows: 2 }"
             v-model="addUserForm.remark"
             placeholder="【非必须】输入对该用户的备注"
-            name="name"
+            name="remark"
             tabindex="4"
           />
         </el-form-item>
@@ -99,122 +99,51 @@
             :autosize="{ minRows: 2 }"
             v-model="editUserForm.remark"
             placeholder="【非必须】输入对该用户的备注"
-            name="name"
+            name="remark"
             tabindex="4"
           />
         </el-form-item>
-        <el-button type="primary" @click="submitAddUser" style="width: 100%">提交修改</el-button>
+        <el-button type="primary" @click="submitEditUser" style="width: 100%">提交修改</el-button>
       </el-form>
     </el-dialog>
     <el-dialog v-model="createProjectVisible" title="新建项目">
-      <el-form :model="createProjectForm" label-position="left" label-width="auto">
-        <el-form-item label="项目编号">
-          <el-input
-            v-model="createProjectForm.id"
-            placeholder="请输入项目编号"
-            name="id"
-            tabindex="1"
-          />
-        </el-form-item>
-        <el-form-item label="项目完整名称">
-          <el-input
-            v-model="createProjectForm.name"
-            placeholder="请输入项目的完整名称"
-            name="name"
-            tabindex="2"
-          />
-        </el-form-item>
-        <el-form-item label="项目简介">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 3 }"
-            v-model="createProjectForm.description"
-            placeholder="【非必须】请输入项目内容简介"
-            name="name"
-            tabindex="3"
-          />
-        </el-form-item>
-        <el-form-item label="项目组长">
-          <div class="form-tags">
-            <el-tag
-              type="success"
-              v-for="(leader, li) in createProjectForm.leaders"
-              closable
-              @close="handleDeleteLeaderInCreateProject(li)"
-            >
-              {{ `${leader.name} ${leader.phone}` }}
-            </el-tag>
-          </div>
-          <el-autocomplete
-            v-model="searchLeaderPhone"
-            :fetch-suggestions="leaderSearch"
-            :trigger-on-focus="false"
-            placeholder="请输入项目组长的手机号"
-            @select="handleSelectLeader"
-          >
-            <template #default="{ item }">
-              {{ `${item.phone} ${item.name} ${item.hospital}` }}
-            </template>
-          </el-autocomplete>
-        </el-form-item>
-        <el-button type="primary" @click="submitCreateProject" style="width: 100%">创建</el-button>
-      </el-form>
+      <CreatePrject :allUserList="allUserList" @close="createProjectVisible = false" />
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import CreatePrject from './CreateProject.vue'
+import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import Topbar from '@/components/system/Topbar.vue'
-import { ref, watch, computed } from 'vue'
-const searchContent = ref('')
+import { ref, watch, computed, onMounted } from 'vue'
+const searchUserText = ref('')
 const addUserVisible = ref(false)
-const createProjectVisible = ref(false)
 const editUserVisible = ref(false)
-const addUserForm = ref({
-  phone: '',
-  name: '',
-  hospital: '',
-  remark: ''
-})
-const createProjectForm = ref({
-  id: '',
-  name: '',
-  description: '',
-  leaders: []
-})
-const searchLeaderPhone = ref('')
-const editUserForm = ref({
-  phone: '',
-  name: '',
-  hospital: '',
-  remark: ''
-})
-const userTable = ref([])
-const allUserTable = ref([
-  { name: 'Alex', phone: '111', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' },
-  { name: 'Bob', phone: '112', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' }
-])
-const createProjectLeaderPhones = computed(() =>
-  createProjectForm.value.leaders.map((l) => l.phone)
-)
-const leaderSearch = (str, cb) => {
-  const res = str ? allUserTable.value.filter((u) => u.phone.includes(str)) : allUserTable.value
-  cb(res)
+const createProjectVisible = ref(false)
+const curUserList = ref([])
+const allUserList = ref([])
+const addUserForm = ref({})
+const editUserForm = ref({})
+const addLeaderForm = ref({})
+const resetForm = (formName) => {
+  switch (formName) {
+    case 'addUserForm':
+      addUserForm.value = { phone: '', name: '', hospital: '', remark: '' }
+      break
+    case 'editUserForm':
+      editUserForm.value = { phone: '', name: '', hospital: '', remark: '' }
+      break
+    default:
+      resetForm('addUserForm')
+      resetForm('editUserForm')
+      break
+  }
 }
-const handleSelectLeader = (leader) => {
-  if (createProjectLeaderPhones.value.includes(leader.phone)) return
-  createProjectForm.value.leaders.push(leader)
-}
-const handleDeleteLeaderInCreateProject = (li) => {
-  createProjectForm.value.leaders.splice(li, 1)
-}
-const submitCreateProject = () => {
-  console.log(createProjectForm.value)
-  createProjectVisible.value = false
-}
-const handleEdit = (index, row) => {
+resetForm()
+const handleEditUser = (index, row) => {
   editUserForm.value.phone = row.phone
   editUserForm.value.name = row.name
   editUserForm.value.hospital = row.hospital
@@ -240,23 +169,35 @@ const handleDeleteUser = (index, row) => {
   }).then(() => {})
 }
 const submitAddUser = () => {
+  const form = addUserForm.value
+  if (!form.name || !form.phone || !form.hospital) return
   console.log(addUserForm.value)
   addUserVisible.value = false
+  resetForm('addUserForm')
 }
 const submitEditUser = () => {
+  const form = editUserForm.value
+  if (!form.name || !form.phone || !form.hospital) return
   editUserVisible.value = false
+  resetForm('editUserForm')
 }
-const searchCurUserTable = (newS) => {
+const searchCurUserList = (newS) => {
   const s = newS.toLowerCase()
   if (s) {
-    userTable.value = allUserTable.value.filter((u) =>
+    curUserList.value = allUserList.value.filter((u) =>
       `${u.name}${u.phone}${u.hospital}`.toLowerCase().includes(s)
     )
   } else {
-    userTable.value = allUserTable.value
+    curUserList.value = allUserList.value
   }
 }
-watch(searchContent, searchCurUserTable, { deep: true, immediate: true })
+watch(searchUserText, debounce(searchCurUserList, 500), { deep: true, immediate: true })
+onMounted(() => {
+  allUserList.value = [
+    { name: 'Alex', phone: '111', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' },
+    { name: 'Bob', phone: '112', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' }
+  ]
+})
 </script>
 
 <style lang="less" scoped>
@@ -275,11 +216,6 @@ watch(searchContent, searchCurUserTable, { deep: true, immediate: true })
     .search-input {
       width: 300px;
     }
-  }
-}
-.form-tags {
-  .el-tag+.el-tag {
-    margin-left: 4px;
   }
 }
 </style>

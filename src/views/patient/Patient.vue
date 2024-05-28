@@ -2,11 +2,11 @@
   <div class="patient-page">
     <Topbar />
     <div class="main">
-      <el-descriptions title="患者信息" border :column="2">
+      <el-descriptions title="受试者信息" border :column="2">
         <template #extra>
           <el-button type="primary" @click="isShowChooseAssess = true">进行谵妄评估</el-button>
         </template>
-        <el-descriptions-item label="患者编号">{{
+        <el-descriptions-item label="受试者编号">{{
           patient.idInProject + ' ' + patient.alpha
         }}</el-descriptions-item>
         <el-descriptions-item label="所属项目">{{
@@ -39,10 +39,15 @@
       </div>
     </div>
     <div class="main">
-      <div class="main-title">患者历史评估记录</div>
+      <div class="main-title">受试者历史评估记录</div>
       <el-table :data="allAssessmentList">
         <el-table-column prop="scale" label="评估量表"></el-table-column>
-        <el-table-column prop="date" label="评估日期" sortable></el-table-column>
+        <el-table-column prop="time" label="评估时间" sortable>
+          <template #default="scope">
+            {{ scope.row.time }}
+            <el-tag size="small" type="success">Day1早</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="assessor" label="评估者"></el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
@@ -86,8 +91,8 @@ const patient = ref({
   operateDate: '2024-05-14'
 })
 const allAssessmentList = ref([
-  { id: '1', scale: '3D-CAM', date: '2024-05-15', assessor: '王医生' },
-  { id: '2', scale: '3D-CAM', date: '2024-05-17', assessor: 'A医生' }
+  { id: '1', scale: '3D-CAM', time: '2024-05-15 08:00', assessor: '王医生' },
+  { id: '2', scale: '3D-CAM', time: '2024-05-17 17:32', assessor: 'A医生' }
 ])
 const assessMatrixNum = 7
 const assessMatrix = computed(() => {

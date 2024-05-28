@@ -37,10 +37,10 @@
       :before-close="() => {}"
     >
       <div class="beginning-text">
-        告知患者：现在我会问您几个问题来检测您的记忆力，如果您不知道答案也不用担心。
+        告知受试者：现在我会问您几个问题来检测您的记忆力，如果您不知道答案也不用担心。
       </div>
       <div class="beginning-text">
-        请围绕某一主题（例如近期睡眠、疼痛、恶心呕吐、活动情况等）和患者进行3-5句简短对话。从中观察患者反应。
+        请围绕某一主题（例如近期睡眠、疼痛、恶心呕吐、活动情况等）和受试者进行3-5句简短对话。从中观察受试者反应。
       </div>
       <div class="beginning-btn-container inner-center">
         <el-button

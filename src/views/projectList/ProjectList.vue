@@ -1,9 +1,8 @@
 <template>
   <div class="projectList">
-    <Topbar :showBack="false"/>
+    <Topbar :showBack="false" />
     <div class="projectList-main">
       <div class="header-line">
-        <el-button type="primary" plain @click="isShowCreateProject = true">新建项目</el-button>
         <el-input
           v-model="searchContent"
           placeholder="输入信息搜索项目"
@@ -14,7 +13,6 @@
       <el-table :data="projectTable" class="project-table">
         <el-table-column prop="id" label="项目编号"></el-table-column>
         <el-table-column prop="name" label="项目名"></el-table-column>
-        <el-table-column prop="leader" label="组长"></el-table-column>
         <el-table-column label="操作" width="330">
           <template #default="scope">
             <el-button size="small" @click="gotoProject(scope.$index, scope.row)"
@@ -23,7 +21,7 @@
             <el-button size="small" @click="showMember(scope.$index, scope.row)"
               >查看成员</el-button
             >
-            <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
+            <el-button size="small" @click="handleEditMember(scope.$index, scope.row)"
               >修改信息</el-button
             >
             <el-button
@@ -37,7 +35,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog v-model="isShowEditProject" title="修改信息" width="400">
+    <el-dialog v-model="editProjectVisible" title="修改信息" width="400">
       <el-form :model="editProjectForm" label-width="auto" label-position="left">
         <el-form-item label="项目编号">
           <el-input v-model="editProjectForm.id" name="id" tabindex="1" disabled />
@@ -60,18 +58,23 @@
             tabindex="3"
           />
         </el-form-item>
-        <el-button type="primary" @click="submitCreateProject" style="width: 100%"
+        <el-button type="primary" @click="submitEditProject" style="width: 100%"
           >提交修改</el-button
         >
       </el-form>
     </el-dialog>
-    <el-dialog v-model="isShowProjectMember" title="项目成员" width="75%">
+    <el-dialog
+      v-model="projectMemberVisible"
+      :title="project2showMember.id + project2showMember.name + '成员'"
+      width="75%"
+    >
       <ProjectMember :project="project2showMember" />
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import Topbar from '@/components/system/Topbar.vue'
@@ -81,29 +84,27 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const searchContent = ref('')
-const isShowCreateProject = ref(false)
-const isShowEditProject = ref(false)
-const isShowProjectMember = ref(false)
-const project2showMember = ref(null)
+const editProjectVisible = ref(false)
+const projectMemberVisible = ref(false)
+const project2showMember = ref({})
 const editProjectForm = ref({
-  phone: '',
+  id: '',
   name: '',
-  hospital: ''
+  description: ''
 })
 const projectTable = ref([])
 const allProjectTable = ref([
-  { name: '项目A', id: 'XM001', leader: 'Bob', description: 'balabala' },
-  { name: '项目B', id: 'XM002', leader: 'Alex', description: 'balabala' }
+  { name: '项目A', id: 'XM001', description: 'balabala' },
+  { name: '项目B', id: 'XM002', description: 'balabala' }
 ])
-const handleEdit = (index, row) => {
+const handleEditMember = (index, row) => {
   editProjectForm.value.id = row.id
   editProjectForm.value.name = row.name
-  editProjectForm.value.leader = row.leader
   editProjectForm.value.description = row.description
-  isShowEditProject.value = true
+  editProjectVisible.value = true
 }
 const showMember = (index, row) => {
-  isShowProjectMember.value = true
+  projectMemberVisible.value = true
   project2showMember.value = row
 }
 const gotoProject = (index, row) => {
@@ -117,20 +118,22 @@ const handleDeleteProject = (index, row) => {
   }).then(() => {})
 }
 const submitEditProject = (index, row) => {
-  isShowEditProject.value = false
-  editProjectForm.value = row
+  const form = editProjectForm.value
+  if (!form.id || !form.name || !form.description) return
+  editProjectVisible.value = false
+  editProjectForm.value = { id: '', name: '', description: '' }
 }
 const searchCurProjectTable = (newS) => {
   const s = newS.toLowerCase()
   if (s) {
     projectTable.value = allProjectTable.value.filter((u) =>
-      `${u.name}${u.id}${u.leader}`.toLowerCase().includes(s)
+      `${u.name}${u.id}`.toLowerCase().includes(s)
     )
   } else {
     projectTable.value = allProjectTable.value
   }
 }
-watch(searchContent, searchCurProjectTable, { deep: true, immediate: true })
+watch(searchContent, debounce(searchCurProjectTable, 500), { deep: true, immediate: true })
 </script>
 
 <style lang="less" scoped>

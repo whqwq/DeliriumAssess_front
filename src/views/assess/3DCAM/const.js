@@ -191,7 +191,7 @@ export const getTemplateQAs = () => [
     question: {
       i: '21',
       content:
-        '请查询病历或者联系了解患者情况的家属、朋友或护理人员，了解：在过去24小时，患者的记忆力或思维是否有急性改变？（如糊涂、幻觉、思维混乱）',
+        '请查询病历或者联系了解受试者情况的家属、朋友或护理人员，了解：在过去24小时，受试者的记忆力或思维是否有急性改变？（如糊涂、幻觉、思维混乱）',
       choices: choicesList[4],
       isExtra: true,
       isHide: true,
@@ -201,8 +201,8 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '11A',
-      content: '患者在访视期间是否出现困倦？',
-      answerTips: '患者实际入睡，但是容易唤醒',
+      content: '受试者在访视期间是否出现困倦？',
+      answerTips: '受试者实际入睡，但是容易唤醒',
       choices: choicesList[5]
     },
     answer: { choice: '', input: '', value: false, needInput: false }
@@ -210,7 +210,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '11B',
-      content: '患者在访视期间是否昏睡或昏迷？',
+      content: '受试者在访视期间是否昏睡或昏迷？',
       answerTips: '难以唤醒',
       choices: choicesList[5]
     },
@@ -219,7 +219,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '12',
-      content: '患者是否表现出过度警觉？',
+      content: '受试者是否表现出过度警觉？',
       answerTips: '对环境中的普通事物或刺激出现过分强烈的反应、不适当的惊吓等',
       choices: choicesList[5]
     },
@@ -228,7 +228,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '13',
-      content: '患者的思维是否不清晰或没有逻辑？',
+      content: '受试者的思维是否不清晰或没有逻辑？',
       answerTips:
         '无意义的语句、无法正确回答问题、矛盾的陈述或思维不可预测地从一个主题转移至另一个主题',
       choices: choicesList[5]
@@ -238,7 +238,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '14',
-      content: '患者的谈话是否漫无边际、过度冗长或者无法围绕主题？',
+      content: '受试者的谈话是否漫无边际、过度冗长或者无法围绕主题？',
       answerTips: '脱离谈话主题或者讲述与访视无关的故事',
       choices: choicesList[5]
     },
@@ -247,7 +247,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '15',
-      content: '患者的谈话是否过于局限或话语极少？',
+      content: '受试者的谈话是否过于局限或话语极少？',
       answerTips:
         '过度简洁或刻板地回答。病人不主动发起任何谈话，但是可以回答问题，一般只用是或否进行回答。',
       choices: choicesList[5]
@@ -257,7 +257,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '16',
-      content: '在访视过程中，患者是否难以记住访视内容？',
+      content: '在访视过程中，受试者是否难以记住访视内容？',
       choices: choicesList[5],
       answerTips: '反复要求评估者重复问题'
     },
@@ -266,7 +266,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '17',
-      content: '患者是否容易被周围环境刺激吸引？',
+      content: '受试者是否容易被周围环境刺激吸引？',
       choices: choicesList[5],
       answerTips: '比如电视、房间外的人、室友谈话'
     },
@@ -275,7 +275,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '18',
-      content: '访视期间患者的意识水平是否有波动？',
+      content: '访视期间受试者的意识水平是否有波动？',
       answerTips: '访视的部分时间里频繁入睡，但部分时间则完全清醒',
       choices: choicesList[5]
     },
@@ -284,7 +284,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '19',
-      content: '访视期间患者的注意力水平是否有波动?',
+      content: '访视期间受试者的注意力水平是否有波动?',
       answerTips:
         '访视的部分时间注意力很不集中，但部分时间可以集中注意力。提示：仅根据正确回答一些问题，而错误回答另一些问题不足以判断此特征',
       choices: choicesList[5]
@@ -294,7 +294,7 @@ export const getTemplateQAs = () => [
   {
     question: {
       i: '20',
-      content: '访视期间患者的言语或思维在是否有波动？',
+      content: '访视期间受试者的言语或思维在是否有波动？',
       answerTips: '访视的部分时间语速很慢，然后又很快；或者言语内容部分与访视有关然后又无关',
       choices: choicesList[5]
     },
@@ -304,7 +304,7 @@ export const getTemplateQAs = () => [
     question: {
       i: '22',
       content:
-        '检查之前的3D-CAM评估结果(若有)，根据任何新发“阳性”症状，确定患者是否有急性改变，记录距离上次日期和改变特征',
+        '检查之前的3D-CAM评估结果(若有)，根据任何新发“阳性”症状，确定受试者是否有急性改变，记录距离上次日期和改变特征',
       choices: choicesList[4],
       isExtra: true
     },
@@ -332,7 +332,7 @@ export const questionGroups = [
   {
     title: '季节倒数',
     dialog: '请从冬季开始，倒着说出四个季节。',
-    tips: '可以提示：“冬季之前是哪个季节？；只能使用1次提示。注意：可以提示“再之前是哪个季节”，但是不要主动提示“冬/秋/夏季之前是哪个季节？”如果患者按照正序说出季节，请再次进行说明',
+    tips: '可以提示：“冬季之前是哪个季节？；只能使用1次提示。注意：可以提示“再之前是哪个季节”，但是不要主动提示“冬/秋/夏季之前是哪个季节？”如果受试者按照正序说出季节，请再次进行说明',
     QAs: getQAsByIdList(templateQAs, ['6A', '6B', '6C', '6D'])
   },
   {
@@ -342,9 +342,9 @@ export const questionGroups = [
     QAs: getQAsByIdList(templateQAs, ['7A', '7B', '7C', '7D', '7E'])
   },
   {
-    title: '患者主诉症状',
+    title: '受试者主诉症状',
     dialog: '现在我会问几个问题，是关于您过去一天的情况。',
-    tips: '如果患者在以下任意一项问题中回答“是”或“无意义”，请询问细节（何时发生/具体内容/发生频率）并记录答案。',
+    tips: '如果受试者在以下任意一项问题中回答“是”或“无意义”，请询问细节（何时发生/具体内容/发生频率）并记录答案。',
     QAs: getQAsByIdList(templateQAs, ['8', '9', '10', '21'])
   },
   {

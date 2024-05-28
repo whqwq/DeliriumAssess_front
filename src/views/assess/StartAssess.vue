@@ -46,14 +46,14 @@ const patient = ref({
   alpha: 'W'
 })
 const assessType = ref(route.query.assessType)
-const assessTarget = computed(() => (assessType === '3D-CAM' ? '机械通气患者' : '非机械通气患者'))
+const assessTarget = computed(() => (assessType === '3D-CAM' ? '机械通气受试者' : '非机械通气受试者'))
 const assessTips = ref([
   '3D-CAM量表分为受试者访视和评估者观察两部分。',
   '每个问题仅可重复1次，请记录每个答案，并在相应的选项上进行标记。',
   '点击题目，系统会提示该题的正确答案',
   '每个问题都需要完成，不要跳过进行。',
   '每组问题可以随时进行暂存；但最终提交时不得有空题。',
-  '对患者多加鼓励，不可批评。'
+  '对受试者多加鼓励，不可批评。'
 ])
 const assessTipsChecks = ref([])
 const isShowBtn = computed(() => assessTips.value.length === assessTipsChecks.value.length)

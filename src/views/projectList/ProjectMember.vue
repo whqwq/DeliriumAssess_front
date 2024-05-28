@@ -1,11 +1,11 @@
 <template>
   <div class="projectMember-container">
-    <div class="projectTitle">
+    <!-- <div class="projectTitle">
       <span>{{ project.id }}</span
       ><span style="margin-left: 24px">{{ project.name }}</span>
-    </div>
+    </div> -->
     <div class="header-line">
-      <el-button type="primary" plain @click="isShowAddMember = true">添加成员</el-button>
+      <el-button type="primary" plain @click="addMemberVisible = true">添加成员</el-button>
       <el-input
         v-model="searchContent"
         placeholder="搜索组内成员"
@@ -31,14 +31,27 @@
         </template></el-table-column
       >
     </el-table>
-    <el-dialog v-model="isShowAddMember" title="添加成员" width="300">
+    <el-dialog v-model="addMemberVisible" title="添加成员" width="350">
       <el-form :model="addMemberForm" label-width="auto" label-position="left">
-        <el-form-item title="手机号">
+        <el-form-item label="手机号">
           <el-input
             v-model="addMemberForm.phone"
             placeholder="请输入被添加者的手机号"
             name="phone"
-            tabindex="1"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="医院名称">
+          <el-input
+            v-model="addMemberForm.hospital"
+            placeholder="请输入被添加者的医院名称"
+            name="hospital"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="医院编号">
+          <el-input
+            v-model="addMemberForm.hospitalNo"
+            placeholder="请输入该医院在项目内的编号"
+            name="hospitalNo"
           ></el-input>
         </el-form-item>
         <el-button type="primary" @click="submitAddMember" style="width: 100%">添加</el-button>
@@ -48,15 +61,18 @@
 </template>
 
 <script setup>
+import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import { ref, watch, computed } from 'vue'
 const props = defineProps(['project'])
 const project = props.project
 
-const isShowAddMember = ref(false)
+const addMemberVisible = ref(false)
 const addMemberForm = ref({
-  phone: ''
+  phone: '',
+  hospital: '',
+  hospitalNo: ''
 })
 const searchContent = ref('')
 const memberTable = ref([])
@@ -75,7 +91,9 @@ const searchCurMemberTable = (newS) => {
   }
 }
 const submitAddMember = () => {
-  isShowAddMember.value = false
+  const form = addMemberForm.value
+  if (!form.phone || !form.hospitalNo || !form.hospital) return
+  addMemberVisible.value = false
 }
 const handleDeleteMember = (index, row) => {
   ElMessageBox.confirm(`确认移除成员 ${row.name} ${row.phone} ？`, '警告', {
@@ -84,7 +102,7 @@ const handleDeleteMember = (index, row) => {
     type: 'warning'
   }).then(() => {})
 }
-watch(searchContent, searchCurMemberTable, { deep: true, immediate: true })
+watch(searchContent, debounce(searchCurMemberTable, 500), { deep: true, immediate: true })
 </script>
 
 <style scoped lang="less">
