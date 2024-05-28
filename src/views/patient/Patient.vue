@@ -4,35 +4,40 @@
     <div class="main">
       <el-descriptions title="受试者信息" border :column="2">
         <template #extra>
-          <el-button type="primary" @click="isShowChooseAssess = true">进行谵妄评估</el-button>
+          <el-button type="primary" @click="chooseAssessVisible = true">进行谵妄评估</el-button>
         </template>
-        <el-descriptions-item label="受试者编号">{{
-          patient.idInProject + ' ' + patient.alpha
-        }}</el-descriptions-item>
-        <el-descriptions-item label="所属项目">{{
-          project.id + ' ' + project.name
-        }}</el-descriptions-item>
-        <el-descriptions-item label="所属医院">{{ patient.hospital }}</el-descriptions-item>
+        <el-descriptions-item label="受试者编号">
+          {{ `${patient.idInProject} ${patient.alpha}` }}
+        </el-descriptions-item>
+        <el-descriptions-item label="所属项目">
+          {{ `${project.id} ${project.name}` }}
+        </el-descriptions-item>
+        <el-descriptions-item label="所属医院">
+          {{ `${patient.hospitalNo} ${patient.hospital}` }}
+        </el-descriptions-item>
         <el-descriptions-item label="手术日期">{{ patient.operateDate }}</el-descriptions-item>
       </el-descriptions>
     </div>
     <div class="main">
       <div class="main-title">术后{{ assessMatrixNum }}天评估完成情况</div>
-      <div class="matrix">
-        <div v-for="u in assessMatrix">
+      <div class="matrix" v-for="(matrix, mi) in assessMatrixs">
+        <el-tag type="info">{{ mi ? '晚' : '早' }}</el-tag>
+        <div v-for="u in matrix">
           <el-popover
             placement="top"
             width="auto"
             trigger="click"
-            :content="`${u.date} ${u.flag > 0 ? '已完成' : '未完成'}评估`"
+            :content="`${u.date}${mi ? '晚' : '早'}间评估${u.flag > 0 ? '已完成' : '未完成'}`"
           >
             <template #reference>
               <div
                 class="matrix-unit"
                 :style="{
-                  backgroundColor: u.flag < 0 ? 'lightgray' : u.flag > 0 ? 'limegreen' : 'red'
+                  backgroundColor: u.flag > 0 ? 'limegreen' : u.flag < 0 ? 'lightgray' : 'red'
                 }"
-              ></div>
+              >
+                <el-icon><Select v-if="u.flag > 0" /><CloseBold v-else /></el-icon>
+              </div>
             </template>
           </el-popover>
         </div>
@@ -40,31 +45,36 @@
     </div>
     <div class="main">
       <div class="main-title">受试者历史评估记录</div>
-      <el-table :data="allAssessmentList">
+      <el-table :data="assessmentList">
         <el-table-column prop="scale" label="评估量表"></el-table-column>
         <el-table-column prop="time" label="评估时间" sortable>
           <template #default="scope">
             {{ scope.row.time }}
-            <el-tag size="small" type="success">Day1早</el-tag>
+            <el-tag size="small" type="success">
+              {{ `Day${scope.row.daysNum} ${scope.row.isAM ? '早' : '晚'}` }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="assessor" label="评估者"></el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button size="small" @click="gotoAssessment(scope.$index, scope.row)"> 查看 </el-button>
+            <el-button size="small" @click="gotoAssessment(scope.$index, scope.row)">
+              查看
+            </el-button>
           </template></el-table-column
         >
       </el-table>
     </div>
-    <el-dialog v-model="isShowChooseAssess" title="选择评估方法" width="300">
+    <el-dialog v-model="chooseAssessVisible" title="选择评估方法" width="300">
       <el-radio-group v-model="assessType">
         <el-radio value="3D-CAM">3D-CAM</el-radio>
         <el-radio value="CAM-ICU" disabled>CAM-ICU</el-radio>
       </el-radio-group>
       <div>
-        <el-button class="gotoStartAssess-btn" type="primary" @click="gotoStartAssess">确定</el-button>
+        <el-button class="gotoStartAssess-btn" type="primary" @click="gotoStartAssess"
+          >确定</el-button
+        >
       </div>
-      
     </el-dialog>
   </div>
 </template>
@@ -72,13 +82,13 @@
 <script setup>
 import moment from 'moment'
 import Topbar from '@/components/system/Topbar.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
 const assessType = ref('3D-CAM')
-const isShowChooseAssess = ref(false)
+const chooseAssessVisible = ref(false)
 const project = ref({
   id: 'XM001',
   name: '项目A'
@@ -88,33 +98,41 @@ const patient = ref({
   idInProject: '001',
   alpha: 'W',
   hospital: '北医一院',
-  operateDate: '2024-05-14'
+  hospitalNo: '01',
+  operateDate: '2024-05-14',
+  assessmentList: []
 })
-const allAssessmentList = ref([
-  { id: '1', scale: '3D-CAM', time: '2024-05-15 08:00', assessor: '王医生' },
-  { id: '2', scale: '3D-CAM', time: '2024-05-17 17:32', assessor: 'A医生' }
-])
+const assessmentList = computed(() => patient.value.assessmentList)
 const assessMatrixNum = 7
-const assessMatrix = computed(() => {
-  const curDate = moment(new Date())
-  const operateDateString = patient.value.operateDate
-  const matrixMap = {}
-  for (var i = 1; i <= assessMatrixNum; i++) {
-    const tmpDate = moment(operateDateString).add(i, 'd')
-    const tmpDateString = tmpDate.format('YYYY-MM-DD')
-    if (tmpDate <= curDate) matrixMap[tmpDateString] = 0
-    else matrixMap[tmpDateString] = -1
+const assessMatrixs = ref([])
+const genAssessMatrix = () => {
+  assessMatrixs.value = []
+  const matrixAM = []
+  const matrixPM = []
+  const mmt_curDate = moment(new Date())
+  const operateData = patient.value.operateDate
+  // 初始化矩阵,未到日期的-1，已到日期的0
+  for (let i = 1; i <= assessMatrixNum; i++) {
+    const mmt_tmpDate = moment(operateData).add(i, 'd')
+    matrixAM.push({
+      date: mmt_tmpDate.format('YYYY-MM-DD'),
+      flag: mmt_tmpDate <= mmt_curDate ? 0 : -1
+    })
+    matrixPM.push({
+      date: mmt_tmpDate.format('YYYY-MM-DD'),
+      flag: mmt_tmpDate <= mmt_curDate ? 0 : -1
+    })
   }
-  for (const r of allAssessmentList.value) {
-    matrixMap[r.date] = 1
+  // 遍历评估，把矩阵里对应位置设置为完成状态1
+  for (let i = 0; i < assessmentList.value.length; i++) {
+    const a = assessmentList.value[i]
+    if (a.daysNum > 0 && a.daysNum <= assessMatrixNum) {
+      if (a.isAM) matrixAM[a.daysNum].flag = 1
+      else matrixPM[a.daysNum].flag = 1
+    }
   }
-  const matrix = []
-  for (var i = 1; i <= assessMatrixNum; i++) {
-    const tmpDateString = moment(operateDateString).add(i, 'd').format('YYYY-MM-DD')
-    matrix.push({ date: tmpDateString, flag: matrixMap[tmpDateString] })
-  }
-  return matrix
-})
+  assessMatrixs.value = [matrixAM, matrixPM]
+}
 const gotoStartAssess = () => {
   router.push({
     path: '/startAssess',
@@ -124,10 +142,39 @@ const gotoStartAssess = () => {
 const gotoAssessment = (index, row) => {
   router.push({ path: '/assessmentResult', query: { assessmentId: row.id } })
 }
+const getPatientDetails = () => {
+  patient.value = {}
+  const data = {
+    id: route.query.patientId,
+    idInProject: '001',
+    alpha: 'W',
+    hospital: '北医一院',
+    hospitalNo: '01',
+    operateDate: '2024-05-14',
+    assessmentList: [
+      { id: '1', scale: '3D-CAM', time: '2024-05-15 08:00', assessor: '王医生' },
+      { id: '2', scale: '3D-CAM', time: '2024-05-17 17:32', assessor: 'A医生' }
+    ]
+  }
+  const { operateDate } = data
+  const mmt_operateData = moment(operateDate)
+  for (let i = 0; i < data.assessmentList.length; i++) {
+    const a = data.assessmentList[i]
+    const mmt_time = moment(a.time)
+    a.daysNum = mmt_time.diff(mmt_operateData, 'days')
+    a.isAM = mmt_time.hour() <= 12
+  }
+  patient.value = data
+  genAssessMatrix()
+}
+onMounted(() => {
+  getPatientDetails()
+})
 </script>
 
 <style scoped lang="less">
-@matrix-unit-size: 20px;
+@matrix-unit-size: 26px;
+@matrix-unit-gap: 8px;
 .patient-page {
   padding: 32px;
 }
@@ -143,13 +190,21 @@ const gotoAssessment = (index, row) => {
   }
 }
 .matrix {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, @matrix-unit-size);
-  gap: 8px;
+  display: flex;
+  align-items: center;
+  & + .matrix {
+    margin-top: @matrix-unit-gap;
+  }
   .matrix-unit {
+    margin-left: @matrix-unit-gap;
     width: @matrix-unit-size;
     height: @matrix-unit-size;
+    border-radius: calc(@matrix-unit-size / 6);
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
   }
 }
 .gotoStartAssess-btn {

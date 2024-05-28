@@ -9,6 +9,10 @@
           <div>
             <div>评估者：{{ 'username' }}</div>
             <div>受试者：{{ patient.idInProject + patient.alpha }}</div>
+            <div>
+              评估时间：
+              <el-date-picker :editable="false" v-model="assessTime" type="datetime" placeholder="请选择评估时间" />
+            </div>
           </div>
         </div>
       </div>
@@ -17,7 +21,7 @@
       <div class="main-title">请阅读并勾选以下每一条注意事项：</div>
       <div class="startAssess-checkList">
         <el-checkbox @change="changeAllCheck">
-          <span style="font-weight: bold;">全选</span>
+          <span style="font-weight: bold">全选</span>
         </el-checkbox>
         <el-checkbox-group v-model="assessTipsChecks">
           <div v-for="(t, idx) in assessTips">
@@ -45,8 +49,11 @@ const patient = ref({
   idInProject: '001',
   alpha: 'W'
 })
+const assessTime = ref('')
 const assessType = ref(route.query.assessType)
-const assessTarget = computed(() => (assessType === '3D-CAM' ? '机械通气受试者' : '非机械通气受试者'))
+const assessTarget = computed(() =>
+  assessType === '3D-CAM' ? '机械通气受试者' : '非机械通气受试者'
+)
 const assessTips = ref([
   '3D-CAM量表分为受试者访视和评估者观察两部分。',
   '每个问题仅可重复1次，请记录每个答案，并在相应的选项上进行标记。',
@@ -56,7 +63,7 @@ const assessTips = ref([
   '对受试者多加鼓励，不可批评。'
 ])
 const assessTipsChecks = ref([])
-const isShowBtn = computed(() => assessTips.value.length === assessTipsChecks.value.length)
+const isShowBtn = computed(() => assessTips.value.length === assessTipsChecks.value.length && assessTime.value)
 const changeAllCheck = (val) => {
   const len = assessTips.value.length
   if (val) {
@@ -84,9 +91,9 @@ const gotoAssess = () => {
 .startAssess-header {
   width: 100%;
   height: 100%;
-  line-height: 1.5;
+  line-height: 32px;
   .assess-type {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: bolder;
   }
   .assess-target {
