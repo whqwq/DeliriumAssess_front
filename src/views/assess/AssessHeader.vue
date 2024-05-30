@@ -18,7 +18,8 @@
           </div>
         </template>
       </div>
-      <el-button class="submit-btn" plain @click="trySubmit">提交量表</el-button>
+      <el-icon style="cursor: pointer;" @click="showPageTips"><QuestionFilled/></el-icon>
+      <!-- <el-button class="submit-btn" plain @click="trySubmit">提交量表</el-button> -->
     </div>
   </div>
 </template>
@@ -36,7 +37,10 @@ const goBack = () => {
 const turnPage = (i) => {
   curPageIndex.value = i
 }
-const trySubmit = () => emit('trySubmit')
+// const trySubmit = () => emit('trySubmit')
+const showPageTips = () => {
+  
+}
 </script>
 
 <style scoped lang="less">

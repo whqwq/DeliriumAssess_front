@@ -10,9 +10,18 @@
           <QuestionGroup v-for="qg in ap.questionGroups" :questionGroup="qg" v-model="qg.QAs" />
         </div>
         <div class="assess-page-btn-container inner-center">
-          <el-button class="assess-page-btn" type="info" plain round size="large" @click="tmpSave()"
+          <!-- <el-button class="assess-page-btn" type="info" plain round size="large" @click="tmpSave()"
             >暂存</el-button
-          >
+          > -->
+          <el-button
+            class="assess-page-btn"
+            type="primary"
+            round
+            size="large"
+            v-if="api === 3"
+            @click="trySubmit"
+            >提交
+          </el-button>
         </div>
       </div>
     </template>
@@ -143,7 +152,7 @@ const goBack = () => {
   router.go(-1)
 }
 const gotoAssessmentResult = () => {
-  router.push({ path: '/assessmentResult', query: {assessmentId: '001'} })
+  router.push({ path: '/assessmentResult', query: { assessmentId: '001' } })
 }
 onMounted(() => {
   isShowBeginning.value = true
