@@ -10,7 +10,7 @@
         <div v-show="!qa.question.isExtra || isShowExtra">
           <el-divider />
           <div class="question-content">
-            <template v-if="qa.question.answerTips">
+            <!-- <template v-if="qa.question.answerTips">
               <el-popover placement="top" trigger="click" :content="qa.question.answerTips">
                 <template #reference>
                   <span>
@@ -20,12 +20,12 @@
                 </template>
               </el-popover>
             </template>
-            <template v-else>
-              <span>
-                <span class="question-content-number">{{ qa.question.i + '. ' }}</span>
-                {{ qa.question.content }}
-              </span>
-            </template>
+            <template v-else> -->
+            <span>
+              <span class="question-content-number">{{ qa.question.i + '. ' }}</span>
+              {{ qa.question.content }}
+            </span>
+            <!-- </template> -->
           </div>
           <div class="question-answer-container">
             <QuestionAnswer v-model="qa.answer" :choices="qa.question.choices" />

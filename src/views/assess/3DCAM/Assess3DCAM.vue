@@ -216,6 +216,7 @@ onMounted(() => {
     color: #666;
     display: flex;
     justify-content: right;
+    cursor: default;
   }
   .assess-page-btn-container {
     width: 100%;
