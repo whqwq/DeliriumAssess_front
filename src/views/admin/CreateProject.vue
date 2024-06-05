@@ -87,9 +87,9 @@
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue'
-const props = defineProps(['allUserList'])
+const props = defineProps(['userList'])
 const emit = defineEmits(['close'])
-const allUserList = computed(() => props.allUserList)
+const userList = computed(() => props.userList)
 const createProjectForm = ref({})
 const addLeaderForm = ref({})
 const addLeaderVisible = ref(false)
@@ -128,7 +128,7 @@ const addLeaderIntoCreateProject = () => {
   resetForm('addLeaderForm')
 }
 const leaderSearch = (str, cb) => {
-  const res = str ? allUserList.value.filter((u) => u.phone.includes(str)) : allUserList.value
+  const res = str ? userList.value.filter((u) => u.phone.includes(str)) : userList.value
   cb(res)
 }
 const handleSelectLeader = (leader) => {

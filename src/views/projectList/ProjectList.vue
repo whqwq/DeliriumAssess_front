@@ -5,7 +5,7 @@
       <div class="header-line">
         <el-input
           v-model="searchContent"
-          placeholder="输入信息搜索项目"
+          placeholder="搜索项目"
           :prefix-icon="Search"
           class="search-input"
         />
@@ -19,9 +19,9 @@
               >进入项目</el-button
             >
             <el-button size="small" @click="showMember(scope.$index, scope.row)"
-              >查看成员</el-button
+              >成员管理</el-button
             >
-            <el-button size="small" @click="handleEditMember(scope.$index, scope.row)"
+            <el-button size="small" @click="handleEditProject(scope.$index, scope.row)"
               >修改信息</el-button
             >
             <el-button
@@ -97,7 +97,7 @@ const allProjectTable = ref([
   { name: '项目A', id: 'XM001', description: 'balabala' },
   { name: '项目B', id: 'XM002', description: 'balabala' }
 ])
-const handleEditMember = (index, row) => {
+const handleEditProject = (index, row) => {
   editProjectForm.value.id = row.id
   editProjectForm.value.name = row.name
   editProjectForm.value.description = row.description
