@@ -69,7 +69,6 @@ import { ElMessageBox } from 'element-plus'
 import { ref, watch, computed } from 'vue'
 const props = defineProps(['projectList', 'userList'])
 const projectList = computed(() => props.projectList)
-const userList = computed(() => props.userList)
 
 const searchProjectText = ref('')
 const createProjectVisible = ref(false)
