@@ -4,7 +4,7 @@ import miniToastr from 'mini-toastr'
 miniToastr.init()
 
 const instance = axios.create({
-  baseURL: 'http://localhost:8088/api',
+  baseURL: 'http://localhost:8088/',
   timeout: 20000000,
   headers: {
     'Content-Type': 'application/json'
@@ -34,10 +34,11 @@ instance.interceptors.request.use(
 )
 instance.interceptors.response.use(
   (res) => {
+    // console.log('http-response', res)
     if (!res || !res.data) return
     if (res.data.status !== 0) miniToastr.error(res.data.message || 'Error!')
     else if (res.data.message) miniToastr.success(res.data.message)
-    return res.data
+    return res.data.data || {}
   },
   (error) => {
     miniToastr.error('请求失败')

@@ -25,9 +25,8 @@ const userList = ref([])
 const projectList = ref([])
 
 onMounted(() => {
-  HTTPAPI.getAllUsers().then(res => {
-    if (res.status !== 0) return
-    userList.value = res.data.users
+  HTTPAPI.getAllUsers().then(data => {
+    userList.value = data.users
   })
   HTTPAPI.getAllProjects().then(res => {
     if (res.status !== 0) return
