@@ -15,6 +15,7 @@
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import Topbar from '@/components/system/Topbar.vue'
 import UsersManage from './UsersManage.vue'
 import ProjectsManage from './ProjectsManage.vue'
@@ -24,14 +25,14 @@ const userList = ref([])
 const projectList = ref([])
 
 onMounted(() => {
-  userList.value = [
-    { name: 'Alex', phone: '111', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' },
-    { name: 'Bob', phone: '112', hospital: 'abc', createDate: '2024-05-27', remark: 'aaaaaa' }
-  ]
-  projectList.value = [
-    { name: '项目A', id: 'XM001', description: 'balabala' },
-    { name: '项目B', id: 'XM002', description: 'balabala' }
-  ]
+  HTTPAPI.getAllUsers().then(res => {
+    if (res.status !== 0) return
+    userList.value = res.data.users
+  })
+  HTTPAPI.getAllProjects().then(res => {
+    if (res.status !== 0) return
+    projectList.value = res.data.projects
+  })
 })
 </script>
 

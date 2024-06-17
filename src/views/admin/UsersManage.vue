@@ -14,7 +14,7 @@
     <el-table :data="curUserList" class="admin-table">
       <el-table-column prop="name" label="姓名"></el-table-column>
       <el-table-column prop="phone" label="电话"></el-table-column>
-      <el-table-column prop="hospital" label="医院"></el-table-column>
+      <el-table-column prop="hospitalName" label="医院"></el-table-column>
       <el-table-column prop="createDate" label="创建日期"></el-table-column>
       <el-table-column label="操作" width="240">
         <template #default="scope">
