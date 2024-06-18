@@ -112,7 +112,7 @@ const submitAddPatient = () => {
   addPatientForm.value = { id: '', alpha: '', operateDate: '' }
 }
 const searchCurPatientTable = (newS) => {
-  const s = newS.toLowerCase()
+  const s = newS?.toLowerCase()
   if (s) {
     patientTable.value = allPatientTable.value.filter((u) =>
       `${u.alpha}${u.id}${u.operateDate}${u.hospital}`.toLowerCase().includes(s)

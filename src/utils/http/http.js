@@ -1,5 +1,5 @@
 import axios from 'axios'
-import cookie from '../cookie.js'
+import Cookie from '../cookie.js'
 import miniToastr from 'mini-toastr'
 miniToastr.init()
 
@@ -14,10 +14,9 @@ instance.defaults.withCredentials = true
 
 instance.interceptors.request.use(
   (config) => {
-    // const username = cookie.getCookie('username')
-    const phone = cookie.getCookie('phone')
-    const token = cookie.getCookie('token')
-    // 若 localStorage 中含有这些字段，则添加入请求头
+    // const username = Cookie.getCookie('username')
+    const phone = Cookie.getCookie('phone')
+    const token = Cookie.getCookie('token')
     //config.data = qs.stringify(config.data)
     if (phone && token) {
       // console.log(token)
@@ -38,7 +37,7 @@ instance.interceptors.response.use(
     if (!res || !res.data) return
     if (res.data.status !== 0) miniToastr.error(res.data.message || 'Error!')
     else if (res.data.message) miniToastr.success(res.data.message)
-    return res.data.data || {}
+    return res.data || {}
   },
   (error) => {
     miniToastr.error('请求失败')

@@ -124,7 +124,7 @@ const submitEditProject = (index, row) => {
   editProjectForm.value = { id: '', name: '', description: '' }
 }
 const searchCurProjectTable = (newS) => {
-  const s = newS.toLowerCase()
+  const s = newS?.toLowerCase()
   if (s) {
     projectTable.value = allProjectTable.value.filter((u) =>
       `${u.name}${u.id}`.toLowerCase().includes(s)

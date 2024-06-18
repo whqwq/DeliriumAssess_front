@@ -77,6 +77,9 @@
 </template>
 
 <script setup>
+import Cookie from '@/utils/cookie.js'
+import HTTPAPI from '@/utils/http/api.js'
+import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
@@ -95,13 +98,39 @@ const changePwdForm = reactive({
   passwordNew2: ''
 })
 const submitLogin = () => {
-  console.log(loginForm)
   loading.value = true
-  router.push('/admin')
+  HTTPAPI.login(loginForm).then((res) => {
+    loading.value = false
+    if (res.status !== 0) return
+    const { data } = res
+
+    Cookie.setCookie({ token: data.token, phone: loginForm.phone, name: data.name, id: data.id })
+    data.isAdmin ? router.push('/admin') : router.push('/projectList')
+  })
 }
 const submitChangePassword = () => {
-  console.log(changePwdForm)
-  isShowChangPwdDialog.value = false
+  if (
+    !changePwdForm.phone ||
+    !changePwdForm.password ||
+    !changePwdForm.passwordNew1 ||
+    !changePwdForm.passwordNew2
+  ) {
+    ElMessage.error('请填写完整信息')
+    return
+  }
+  if (changePwdForm.passwordNew1 !== changePwdForm.passwordNew2) {
+    ElMessage.error('两次输入的新密码不一致')
+    return
+  }
+  HTTPAPI.changePassword({
+    phone: changePwdForm.phone,
+    password: changePwdForm.password,
+    newPassword: changePwdForm.passwordNew1
+  }).then((res) => {
+    if (res.status !== 0) return
+    ElMessage.success('修改密码成功')
+    isShowChangPwdDialog.value = false
+  })
 }
 </script>
 

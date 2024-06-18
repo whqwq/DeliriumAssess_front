@@ -12,8 +12,8 @@
       />
     </div>
     <el-table :data="curProjectList" class="project-table">
-      <el-table-column prop="id" label="项目编号"></el-table-column>
-      <el-table-column prop="name" label="项目名"></el-table-column>
+      <el-table-column prop="projectId" label="项目编号"></el-table-column>
+      <el-table-column prop="projectName" label="项目名"></el-table-column>
       <el-table-column label="操作" width="330">
         <template #default="scope">
           <el-button size="small" @click="handleEditProject(scope.$index, scope.row)"
@@ -33,13 +33,13 @@
   <el-dialog v-model="editProjectVisible" title="修改信息" width="400">
     <el-form :model="editProjectForm" label-width="auto" label-position="left">
       <el-form-item label="项目编号">
-        <el-input v-model="editProjectForm.id" name="id" tabindex="1" disabled />
+        <el-input v-model="editProjectForm.projectId" name="projectId" tabindex="1" disabled />
       </el-form-item>
       <el-form-item label="项目名称">
         <el-input
-          v-model="editProjectForm.name"
+          v-model="editProjectForm.projectName"
           placeholder="请输入修改后的项目名"
-          name="name"
+          name="projectName"
           tabindex="2"
         />
       </el-form-item>
@@ -57,58 +57,88 @@
     </el-form>
   </el-dialog>
   <el-dialog v-model="createProjectVisible" title="新建项目">
-    <CreatePrject :userList="userList" @close="createProjectVisible = false" />
+    <CreatePrject @submitCreateClose="submitCreateClose" />
   </el-dialog>
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import CreatePrject from './CreateProject.vue'
-import { debounce } from 'lodash'
+import { debounce, get } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
-import { ref, watch, computed } from 'vue'
-const props = defineProps(['projectList', 'userList'])
-const projectList = computed(() => props.projectList)
+import { ElMessageBox, ElMessage } from 'element-plus'
+import { ref, watch, computed, onMounted } from 'vue'
+
+const allProjectList = ref([])
 
 const searchProjectText = ref('')
 const createProjectVisible = ref(false)
 const editProjectVisible = ref(false)
 const editProjectForm = ref({
-  id: '',
-  name: '',
+  projectId: '',
+  projectName: '',
   description: ''
 })
 const curProjectList = ref([])
 const handleEditProject = (index, row) => {
-  editProjectForm.value.id = row.id
-  editProjectForm.value.name = row.name
+  editProjectForm.value.projectId = row.projectId
+  editProjectForm.value.projectName = row.projectName
   editProjectForm.value.description = row.description
   editProjectVisible.value = true
 }
 const handleDeleteProject = (index, row) => {
-  ElMessageBox.confirm(`确认删除项目 ${row.id} ${row.name} ？`, '警告', {
+  ElMessageBox.confirm(`确认删除项目 ${row.projectId} ${row.projectName} ？`, '警告', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {})
+  }).then(() => {
+    HTTPAPI.deleteProject({ projectId: row.projectId }).then((res) => {
+      if (res.status !== 0) return
+      ElMessage.success('删除成功')
+      getAllProjects()
+    })
+  })
 }
-const submitEditProject = (index, row) => {
+const submitEditProject = () => {
   const form = editProjectForm.value
-  if (!form.id || !form.name || !form.description) return
-  editProjectVisible.value = false
-  editProjectForm.value = { id: '', name: '', description: '' }
+  if (!form.projectId || !form.projectName || !form.description) return
+  HTTPAPI.changeProjectInfo(form).then((res) => {
+    if (res.status !== 0) return
+    ElMessage.success('修改成功')
+    getAllProjects()
+    editProjectVisible.value = false
+    editProjectForm.value = { projectId: '', projectName: '', description: '' }
+  })
+}
+const submitCreateClose = () => {
+  createProjectVisible.value = false
+  getAllProjects()
 }
 const searchCurProjectList = (newS) => {
-  const s = newS.toLowerCase()
+  const s = newS?.toLowerCase()
   if (s) {
-    curProjectList.value = projectList.value.filter((u) =>
-      `${u.name}${u.id}`.toLowerCase().includes(s)
+    curProjectList.value = allProjectList.value.filter((u) =>
+      `${u.projectName}${u.projectId}`.toLowerCase().includes(s)
     )
   } else {
-    curProjectList.value = projectList.value
+    curProjectList.value = allProjectList.value
   }
 }
 watch(searchProjectText, debounce(searchCurProjectList, 500), { deep: true, immediate: true })
+
+const getAllProjects = () => {
+  allProjectList.value = []
+  HTTPAPI.getAllProjects().then((res) => {
+    if (res.status !== 0) return
+    const { data } = res
+    allProjectList.value = data.projects
+    searchCurProjectList()
+  })
+}
+
+onMounted(() => {
+  getAllProjects()
+})
 </script>
 
 <style lang="less" scoped>

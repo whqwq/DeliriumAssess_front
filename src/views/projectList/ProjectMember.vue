@@ -81,7 +81,7 @@ const allMemberTabel = ref([
   { name: 'Caroel', phone: '122', hospital: 'Yi2', status: '组员' }
 ])
 const searchCurMemberTable = (newS) => {
-  const s = newS.toLowerCase()
+  const s = newS?.toLowerCase()
   if (s) {
     memberTable.value = allMemberTabel.value.filter((m) =>
       `${m.name}${m.phone}${m.hospital}`.toLowerCase().includes(s)
