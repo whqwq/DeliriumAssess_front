@@ -99,6 +99,7 @@ const router = useRouter()
 
 const isShowBeginning = ref(false)
 const isShowEnding = ref(false)
+const submitedAssessId = ref()
 const assessPages = ref(getTemplateAssessPages())
 const steps = ref(assessPages.value.map((ap) => ({ text: ap.instruction, finished: false })))
 const curPageIndex = ref(0)
@@ -122,7 +123,7 @@ const checkCurQAsFinished = (newCurQAs) => {
   }
   steps.value[curPageIndex.value].finished = true
 }
-watch(curPageQAs, debounce(checkCurQAsFinished, 1000), { deep: true, immediate: true })
+watch(curPageQAs, debounce(checkCurQAsFinished, 500), { deep: true, immediate: true })
 
 const turnPage = (i) => {
   curPageIndex.value = i
@@ -152,14 +153,14 @@ const submitAssess = () => {
   HTTPAPI.submitAssess({
     patientId: route.query.patientId,
     assessTime: route.query.assessTime,
-    scale: route.query.scale,
+    assessType: route.query.assessType,
     assessorPhone: Cookie.getCookie('phone'),
     questionAnswers: questionAnswers
   }).then((res) => {
-    if (res.status !== 0) {
-      isShowEnding.value = true
-      commonStore.loading = false
-    }
+    commonStore.loading = false
+    if (!res || res.status !== 0) return
+    submitedAssessId.value = res.data.assessmentId
+    isShowEnding.value = true
   })
 }
 const trySubmit = () => {
@@ -182,11 +183,11 @@ const goBack = () => {
   router.go(-1)
 }
 const gotoAssessmentResult = () => {
-  router.push({ path: '/assessmentResult', query: { assessmentId: '001' } })
+  router.push({ path: '/assessmentResult', query: { assessmentId: submitedAssessId.value } })
 }
 onMounted(() => {
   isShowBeginning.value = true
-  // assessPages.value = JSON.parse(getTemplateAssessPagesWithAnswersJSON())
+  assessPages.value = JSON.parse(getTemplateAssessPagesWithAnswersJSON())
 })
 </script>
 
@@ -263,7 +264,7 @@ onMounted(() => {
     position: fixed;
     top: 50%;
     translate: 0 -50%;
-    scale: 1 1.6;
+    assessType: 1 1.6;
     font-size: 22px;
     color: #666;
     cursor: pointer;

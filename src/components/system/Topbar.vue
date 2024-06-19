@@ -9,7 +9,12 @@
     </div>
     <div class="topbar-right">
       <div class="topbar-avatar">
-        <el-avatar>{{ username }}</el-avatar>
+        <el-popover placement="bottom" trigger="hover">
+          <template #reference>
+            <el-avatar>{{ username }}</el-avatar>
+          </template>
+          <div class="avatar-menu-item" @click="logout">退出登录</div>
+        </el-popover>
       </div>
     </div>
   </div>
@@ -18,6 +23,7 @@
 
 <script setup>
 import Cookie from '@/utils/cookie.js'
+import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const props = defineProps({
@@ -25,6 +31,11 @@ const props = defineProps({
   showLogo: { default: true }
 })
 const username = Cookie.getCookie('name')
+const logout = () => {
+  Cookie.clearCookie(['id', 'name', 'phone', 'token'])
+  router.push('/login')
+  ElMessage.success('退出登陆')
+}
 const goBack = () => {
   router.go(-1)
 }
@@ -76,6 +87,16 @@ const goBack = () => {
       align-items: center;
       cursor: pointer;
     }
+  }
+}
+.avatar-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  &:hover {
+    color: #409eff;
   }
 }
 </style>

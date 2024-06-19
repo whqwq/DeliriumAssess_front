@@ -19,21 +19,26 @@
 
 <script setup>
 import { getChoiceMap } from './const.js'
-import { ref, watch, defineModel } from 'vue'
+import { ref, watch, defineModel, watchEffect } from 'vue'
 const props = defineProps(['choices', 'locked'])
 
 const choiceTextValueMap = getChoiceMap(props.choices, 'text', 'value')
 const choiceTextNeedInputMap = getChoiceMap(props.choices, 'text', 'needInput')
-const answerChoice = ref(null)
 
 const answer = defineModel()
-const handleChoiceChange = (choice) => {
+const answerChoice = ref(answer.value.choice)
+
+const handleChoiceChange = (choice, choiceOld) => {
+  if (choice === choiceOld) return
   answer.value.input = ''
   answer.value.choice = choice
   answer.value.value = choiceTextValueMap[choice]
   answer.value.needInput = choiceTextNeedInputMap[choice]
 }
 watch(answerChoice, handleChoiceChange)
+watchEffect(() => {
+  answerChoice.value = answer.value.choice
+})
 </script>
 
 <style scoped lang="less">

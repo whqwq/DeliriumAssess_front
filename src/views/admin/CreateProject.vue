@@ -155,7 +155,7 @@ const submitCreateProject = () => {
   const form = createProjectForm.value
   if (!form.projectId || !form.projectName || !form.leaders || !form.leaders.length) return
   HTTPAPI.createProject(form).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     emit('submitCreateClose')
     resetForm('createProject')
   })
@@ -164,7 +164,7 @@ const submitCreateProject = () => {
 const getAllUsers = () => {
   allUserList.value = []
   HTTPAPI.getAllUsers().then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     const data = res.data
     allUserList.value = data.users
   })

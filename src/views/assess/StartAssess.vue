@@ -87,7 +87,7 @@ const gotoAssess = () => {
     query: {
       assessType: assessType.value,
       patientId: patient.value.id,
-      assessTime: moment(assessTime.value).format('YYYY-MM-DD HH:mm:ss')
+      assessTime: moment(assessTime.value).toISOString()
     }
   })
 }

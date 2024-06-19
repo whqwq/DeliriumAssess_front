@@ -93,7 +93,7 @@ const handleDeleteProject = (index, row) => {
     type: 'warning'
   }).then(() => {
     HTTPAPI.deleteProject({ projectId: row.projectId }).then((res) => {
-      if (res.status !== 0) return
+      if (!res || res.status !== 0) return
       ElMessage.success('删除成功')
       getAllProjects()
     })
@@ -103,7 +103,7 @@ const submitEditProject = () => {
   const form = editProjectForm.value
   if (!form.projectId || !form.projectName || !form.description) return
   HTTPAPI.changeProjectInfo(form).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     ElMessage.success('修改成功')
     getAllProjects()
     editProjectVisible.value = false
@@ -129,7 +129,7 @@ watch(searchProjectText, debounce(searchCurProjectList, 500), { deep: true, imme
 const getAllProjects = () => {
   allProjectList.value = []
   HTTPAPI.getAllProjects().then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     const { data } = res
     allProjectList.value = data.projects
     searchCurProjectList()

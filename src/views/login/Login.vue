@@ -13,15 +13,18 @@
             name="phone"
             tabindex="1"
             :prefix-icon="User"
+            clearable
           />
         </el-form-item>
         <el-form-item>
           <el-input
             v-model="loginForm.password"
             placeholder="请输入密码"
+            type="password"
             name="password"
             tabindex="2"
             :prefix-icon="Lock"
+            clearable
           />
         </el-form-item>
         <el-form-item>
@@ -44,30 +47,37 @@
             placeholder="请输入手机号"
             name="phone"
             tabindex="1"
+            clearable
           />
         </el-form-item>
         <el-form-item>
           <el-input
             v-model="changePwdForm.password"
             placeholder="请输入原密码"
+            type="password"
             name="password"
             tabindex="2"
+            clearable
           />
         </el-form-item>
         <el-form-item>
           <el-input
             v-model="changePwdForm.passwordNew1"
             placeholder="请输入新密码"
+            type="password"
             name="passwordNew1"
             tabindex="3"
+            clearable
           />
         </el-form-item>
         <el-form-item>
           <el-input
             v-model="changePwdForm.passwordNew2"
             placeholder="请再次输入新密码"
+            type="password"
             name="passwordNew2"
             tabindex="4"
+            clearable
           />
         </el-form-item>
         <el-button type="primary" @click="submitChangePassword" style="width: 100%">提交</el-button>
@@ -101,7 +111,7 @@ const submitLogin = () => {
   loading.value = true
   HTTPAPI.login(loginForm).then((res) => {
     loading.value = false
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     const { data } = res
 
     Cookie.setCookie({ token: data.token, phone: loginForm.phone, name: data.name, id: data.id })
@@ -127,7 +137,7 @@ const submitChangePassword = () => {
     password: changePwdForm.password,
     newPassword: changePwdForm.passwordNew1
   }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     ElMessage.success('修改密码成功')
     isShowChangPwdDialog.value = false
   })

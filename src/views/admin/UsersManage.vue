@@ -149,7 +149,7 @@ const handleResetPwd = (index, row) => {
     }
   ).then(() => {
     HTTPAPI.resetPassword({ phone: row.phone }).then((res) => {
-      if (res.status !== 0) return
+      if (!res || res.status !== 0) return
       ElMessage.success('密码重置成功')
     })
   })
@@ -161,7 +161,7 @@ const handleDeleteUser = (index, row) => {
     type: 'warning'
   }).then(() => {
     HTTPAPI.deleteUser({ phone: row.phone }).then((res) => {
-      if (res.status !== 0) return
+      if (!res || res.status !== 0) return
       ElMessage.success('用户删除成功')
       getAllUsers()
     })
@@ -171,7 +171,7 @@ const submitAddUser = () => {
   const form = addUserForm.value
   if (!form.name || !form.phone || !form.hospitalName) return
   HTTPAPI.createUser(form).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     addUserVisible.value = false
     ElMessage.success('用户新增成功')
     getAllUsers()
@@ -188,7 +188,7 @@ const submitEditUser = () => {
     hospitalName: form.hospitalName,
     remark: form.remark
   }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     editUserVisible.value = false
     ElMessage.success('用户信息修改成功')
     getAllUsers()
@@ -210,7 +210,7 @@ watch(searchUserText, debounce(searchCurUserList, 500), { deep: true, immediate:
 const getAllUsers = () => {
   allUserList.value = []
   HTTPAPI.getAllUsers().then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     const data = res.data
     allUserList.value = data.users
     searchCurUserList()

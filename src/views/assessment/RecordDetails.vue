@@ -6,8 +6,11 @@
       <div class="main-title-box">
         <div class="title">{{ record.assessType }}评估记录详情</div>
         <div class="subtitle">
-          <span>受试者：{{ record.patient.idInProejct }}</span>
-          <span>记录生成时间：{{ record.editTime }}</span>
+          <span>受试者：{{ record.patientIdInProject + record.patientAlpha }}</span>
+          <span>记录生成时间：{{ record.recordTime }}</span>
+        </div>
+        <div class="subtitle" v-if="record.changeReason">
+          <span>记录修改理由：{{ record.changeReason }}</span>
         </div>
       </div>
       <div v-for="(qa, qai) in record.QAs">
@@ -19,7 +22,7 @@
                 <span class="question-number">{{ qa.question.i + '. ' }}</span>
                 {{ qa.question.content }}
               </span>
-              <span v-if="record.isRecent">
+              <span v-if="record.isLatest">
                 <el-button
                   class="change-btn"
                   plain
@@ -43,7 +46,7 @@
       </div>
     </div>
     <div class="submit-btns">
-      <el-button class="submit-btn" size="large" round v-if="showSubmitBtn" @click="reset"
+      <el-button class="submit-btn" size="large" round v-if="showSubmitBtn" @click="resetChange"
         >撤销修改</el-button
       >
       <el-button
@@ -52,7 +55,7 @@
         size="large"
         round
         v-if="showSubmitBtn"
-        @click="trySubmit"
+        @click="trySubmitChange"
         >提交修改</el-button
       >
     </div>
@@ -60,10 +63,14 @@
 </template>
 
 <script setup>
-import QuestionAnswer from '../assess/3DCAM/QuestionAnswer.vue'
+import moment from 'moment'
+import HTTPAPI from '@/utils/http/api.js'
+import QuestionAnswer from '@/views/assess/3DCAM/QuestionAnswer.vue'
 import Topbar from '@/components/system/Topbar.vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { getFakeRecordDetails } from './const.js'
+import { getTemplateQAs, getQAbyId } from '@/views/assess/3DCAM/const.js'
 import { ref, watch, onMounted, computed } from 'vue'
 import { debounce } from 'lodash'
 
@@ -71,17 +78,28 @@ const route = useRoute()
 const router = useRouter()
 const showSubmitBtn = ref(false)
 
-const recordRaw = ref(getFakeRecordDetails())
-const record = ref({
-  patient: {},
-  assessor: {},
-  QAs: []
-})
+const recordRawJSON = ref('')
+const record = ref({})
+const initRecord = () => {
+  recordRawJSON.value = ''
+  record.value = {
+    QAs: [],
+    recordId: route.query.recordId,
+    isLatest: false,
+    assessType: '',
+    patientId: '',
+    patientIdInProejct: '',
+    patientAlpha: '',
+    recordTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+    changeReason: ''
+  }
+}
+
 const recordLockList = ref([])
 
 const recordQAs = computed(() => record.value.QAs || [])
 
-const checkQAHide = (newQAs) => {
+const checkQAHide3DCAM = (newQAs) => {
   const tmpQAs = newQAs.filter((qa) => ['8', '9', '10'].includes(qa.question.i))
   const isHide = tmpQAs.some((qa) => !qa.answer.value)
   record.value.QAs.forEach((qa) => {
@@ -93,17 +111,82 @@ const unLockAnswer = (idx) => {
   showSubmitBtn.value = true
   recordLockList.value[idx] = false
 }
-const reset = () => {
-  record.value = recordRaw.value
-  recordLockList.value = new Array(recordRaw.value.QAs.length).fill(true)
+const resetChange = () => {
+  const recordRaw = JSON.parse(recordRawJSON.value)
+  record.value = recordRaw
+  recordLockList.value = new Array(recordRaw.QAs.length).fill(true)
   showSubmitBtn.value = false
 }
-const trySubmit = () => {}
+const trySubmitChange = () => {
+  ElMessageBox.prompt('请输入修改理由', '提交修改记录', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /.+/,
+    inputErrorMessage: '修改理由不能为空',
+  }).then(({ value }) => {
+    const questionAnswers = []
+    recordQAs.value.forEach((qa) => {
+      if (!qa.isHide) {
+        questionAnswers.push({
+          questionNo: qa.question.i,
+          questionContent: qa.question.content,
+          answerJudgement: qa.answer.choice,
+          answerContent: qa.answer.input,
+          answerCorrect: qa.answer.value
+        })
+      }
+    })
+    HTTPAPI.changeAssessRecord({
+      recordId: record.value.recordId,
+      changeReason: value,
+      questionAnswers
+    }).then((res) => {
+      if (!res || res.status !== 0) return
+      ElMessage.success('修改成功')
+      setTimeout(() => {
+        router.go(-1)
+        // router.push({ path: '/recordDetails', query: { recordId: res.data.recordId } })
+      }, 1000)
+    })
+  }).catch(() => {})
+}
+const getRecord = () => {
+  const handleQAs = (recordQuestions) => {
+    const templateQAs = getTemplateQAs()
+    return recordQuestions.map((qa) => {
+      const templateQA = getQAbyId(templateQAs, qa.questionNo)
+      const question = {
+        i: templateQA.question.i,
+        content: templateQA.question.content,
+        choices: templateQA.question.choices,
+        isHide: templateQA.question.isHide,
+        isExtra: templateQA.question.isExtra
+      }
+      const answer = {
+        choice: qa.answerJudgement,
+        input: qa.answerContent,
+        value: qa.answerCorrect,
+        needInput: false
+      }
+      return { question, answer }
+    })
+  }
+
+  initRecord()
+  HTTPAPI.getAssessRecordDetails({ recordId: route.query.recordId }).then((res) => {
+    if (!res || res.status !== 0) return
+    const { data } = res || {}
+    const recordRaw = data.record || {}
+    recordRaw.recordTime = moment(recordRaw.recordTime).format('YYYY-MM-DD HH:mm:ss')
+    recordRaw.QAs = handleQAs(recordRaw.recordQuestions)
+    recordRawJSON.value = JSON.stringify(recordRaw)
+    resetChange()
+  })
+}
 onMounted(() => {
-  recordRaw.value = getFakeRecordDetails()
-  reset()
+  getRecord()
   if (record.value.assessType === '3D-CAM') {
-    watch(recordQAs, debounce(checkQAHide, 1000), { deep: true })
+    watch(recordQAs, debounce(checkQAHide3DCAM, 1000), { deep: true })
   }
 })
 </script>

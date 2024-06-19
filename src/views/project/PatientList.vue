@@ -101,7 +101,7 @@ const handleDeletePatient = (index, row) => {
     type: 'warning'
   }).then(() => {
     HTTPAPI.deletePatient({ id: row.id }).then((res) => {
-      if (res.status !== 0) return
+      if (!res || res.status !== 0) return
       ElMessage.success('删除成功')
       getProjectPatients()
     })
@@ -112,7 +112,7 @@ const submitAddPatient = () => {
   console.log(form)
   if (!form.patientIdInProject || !form.alpha || !form.operateDate) return
   HTTPAPI.addPatient({ projectId, ...form }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     ElMessage.success('添加成功')
     getProjectPatients()
     addPatientVisible.value = false
@@ -133,7 +133,7 @@ watch(searchContent, debounce(searchCurPatientList, 500), { deep: true, immediat
 const getProjectPatients = () => {
   allPatientList.value = []
   HTTPAPI.getProjectPatients({ projectId }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     allPatientList.value = res.data.patients
     searchCurPatientList()
   })

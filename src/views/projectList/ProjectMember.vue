@@ -108,7 +108,7 @@ const submitAddMember = () => {
     hospitalIdInProject: form.hospitalIdInProject,
     hospitalNameInProject: form.hospitalNameInProject
   }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     ElMessage.success('添加成功')
     addMemberVisible.value = false
     getAllMemberList()
@@ -121,7 +121,7 @@ const handleDeleteMember = (index, row) => {
     type: 'warning'
   }).then(() => {
     HTTPAPI.deleteProjectMember({ projectId: project.projectId, doctorId: row.id }).then((res) => {
-      if (res.status !== 0) return
+      if (!res || res.status !== 0) return
       ElMessage.success('移除成功')
       getAllMemberList()
     })

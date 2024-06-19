@@ -46,7 +46,7 @@
     <div class="main">
       <div class="main-title">受试者历史评估记录</div>
       <el-table :data="assessmentList">
-        <el-table-column prop="scale" label="评估量表"></el-table-column>
+        <el-table-column prop="assessType" label="评估量表"></el-table-column>
         <el-table-column prop="assessTime" label="评估时间" sortable>
           <template #default="scope">
             {{ scope.row.assessTime }}
@@ -94,15 +94,19 @@ const project = ref({
   projectId: 'XM001',
   projectName: '项目A'
 })
-const patient = ref({
-  id: route.query.patientId,
-  patientIdInProject: '001',
-  alpha: 'W',
-  hospitalNameInProject: '北医一院',
-  hospitalIdInProject: '01',
-  operateDate: '2024-05-14',
-  assessmentList: []
-})
+const patient = ref({})
+const resetPatient = () => {
+  patient.value = {
+    id: route.query.patientId,
+    patientIdInProject: '',
+    alpha: '',
+    hospitalNameInProject: '',
+    hospitalIdInProject: '',
+    operateDate: '',
+    assessmentList: []
+  }
+}
+resetPatient()
 const assessmentList = computed(() => patient.value.assessmentList)
 const assessMatrixNum = 7
 const assessMatrixs = ref([])
@@ -144,9 +148,9 @@ const gotoAssessment = (index, row) => {
   router.push({ path: '/assessmentResult', query: { assessmentId: row.id } })
 }
 const getPatientDetails = () => {
-  patient.value = {}
+  resetPatient()
   HTTPAPI.getPatientDetails({ id: route.query.id }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     const data = { ...(res.data?.patient || {}), assessmentList: res.data?.assessments || [] }
     const { operateDate } = data
     const mmt_operateData = moment(operateDate)

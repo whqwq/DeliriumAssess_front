@@ -28,7 +28,7 @@ const project = ref({
 })
 const getProjectInfo = () => {
   HTTPAPI.getProjectInfo({ projectId: route.query.projectId }).then((res) => {
-    if (res.status !== 0) return
+    if (!res || res.status !== 0) return
     project.value = res.data.project
   })
 }
