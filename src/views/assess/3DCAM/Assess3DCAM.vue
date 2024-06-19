@@ -82,11 +82,13 @@
 </template>
 
 <script setup>
+import Cookie from '@/utils/cookie.js'
+import HTTPAPI from '@/utils/http/api.js'
 import { debounce } from 'lodash'
 import { ElMessageBox } from 'element-plus'
 import AssessHeader from '../AssessHeader.vue'
 import QuestionGroup from './QuestionGroup.vue'
-import { getTemplateAssessPages } from './const.js'
+import { getTemplateAssessPages, getTemplateAssessPagesWithAnswersJSON } from './const.js'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCommonStore } from '@/stores/common.js'
@@ -97,7 +99,6 @@ const router = useRouter()
 
 const isShowBeginning = ref(false)
 const isShowEnding = ref(false)
-
 const assessPages = ref(getTemplateAssessPages())
 const steps = ref(assessPages.value.map((ap) => ({ text: ap.instruction, finished: false })))
 const curPageIndex = ref(0)
@@ -131,6 +132,36 @@ const tmpSave = () => {
   console.log(newCurQAs.filter((qa) => !qa.isHide))
 }
 
+const submitAssess = () => {
+  const questionAnswers = []
+  assessPages.value.forEach((ap) => {
+    ap.questionGroups.forEach((qg) => {
+      qg.QAs.forEach((qa) => {
+        if (!qa.isHide) {
+          questionAnswers.push({
+            questionNo: qa.question.i,
+            questionContent: qa.question.content,
+            answerJudgement: qa.answer.choice,
+            answerContent: qa.answer.input,
+            answerCorrect: qa.answer.value
+          })
+        }
+      })
+    })
+  })
+  HTTPAPI.submitAssess({
+    patientId: route.query.patientId,
+    assessTime: route.query.assessTime,
+    scale: route.query.scale,
+    assessorPhone: Cookie.getCookie('phone'),
+    questionAnswers: questionAnswers
+  }).then((res) => {
+    if (res.status !== 0) {
+      isShowEnding.value = true
+      commonStore.loading = false
+    }
+  })
+}
 const trySubmit = () => {
   commonStore.loading = true
   for (let i = 0; i < steps.value.length; i++) {
@@ -144,8 +175,7 @@ const trySubmit = () => {
       return
     }
   }
-  isShowEnding.value = true
-  commonStore.loading = false
+  submitAssess()
 }
 
 const goBack = () => {
@@ -156,6 +186,7 @@ const gotoAssessmentResult = () => {
 }
 onMounted(() => {
   isShowBeginning.value = true
+  // assessPages.value = JSON.parse(getTemplateAssessPagesWithAnswersJSON())
 })
 </script>
 

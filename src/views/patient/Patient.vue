@@ -158,7 +158,6 @@ const getPatientDetails = () => {
       a.isAM = mmt_time.hour() <= 12
     }
     patient.value = data
-    console.log(data);
     genAssessMatrix()
   })
 }

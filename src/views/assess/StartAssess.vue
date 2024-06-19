@@ -11,7 +11,12 @@
             <div>受试者：{{ patient.idInProject + patient.alpha }}</div>
             <div>
               评估时间：
-              <el-date-picker :editable="false" v-model="assessTime" type="datetime" placeholder="请选择评估时间" />
+              <el-date-picker
+                :editable="false"
+                v-model="assessTime"
+                type="datetime"
+                placeholder="请选择评估时间"
+              />
             </div>
           </div>
         </div>
@@ -39,6 +44,7 @@
 </template>
 
 <script setup>
+import moment from 'moment'
 import Topbar from '@/components/system/Topbar.vue'
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -63,7 +69,9 @@ const assessTips = ref([
   '对受试者多加鼓励，不可批评。'
 ])
 const assessTipsChecks = ref([])
-const isShowBtn = computed(() => assessTips.value.length === assessTipsChecks.value.length && assessTime.value)
+const isShowBtn = computed(
+  () => assessTips.value.length === assessTipsChecks.value.length && assessTime.value
+)
 const changeAllCheck = (val) => {
   const len = assessTips.value.length
   if (val) {
@@ -76,7 +84,11 @@ const changeAllCheck = (val) => {
 const gotoAssess = () => {
   router.push({
     path: '/assess',
-    query: { assessType: assessType.value, patientId: patient.value.id }
+    query: {
+      assessType: assessType.value,
+      patientId: patient.value.id,
+      assessTime: moment(assessTime.value).format('YYYY-MM-DD HH:mm:ss')
+    }
   })
 }
 </script>
