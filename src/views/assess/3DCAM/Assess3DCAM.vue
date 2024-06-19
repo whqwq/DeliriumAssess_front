@@ -264,7 +264,7 @@ onMounted(() => {
     position: fixed;
     top: 50%;
     translate: 0 -50%;
-    assessType: 1 1.6;
+    scale: 1 1.6;
     font-size: 22px;
     color: #666;
     cursor: pointer;
