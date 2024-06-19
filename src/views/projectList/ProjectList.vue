@@ -10,9 +10,9 @@
           class="search-input"
         />
       </div>
-      <el-table :data="projectTable" class="project-table">
-        <el-table-column prop="id" label="项目编号"></el-table-column>
-        <el-table-column prop="name" label="项目名"></el-table-column>
+      <el-table :data="projectList" class="project-table">
+        <el-table-column prop="projectId" label="项目编号"></el-table-column>
+        <el-table-column prop="projectName" label="项目名"></el-table-column>
         <el-table-column label="操作" width="330">
           <template #default="scope">
             <el-button size="small" @click="gotoProject(scope.$index, scope.row)"
@@ -38,13 +38,13 @@
     <el-dialog v-model="editProjectVisible" title="修改信息" width="400">
       <el-form :model="editProjectForm" label-width="auto" label-position="left">
         <el-form-item label="项目编号">
-          <el-input v-model="editProjectForm.id" name="id" tabindex="1" disabled />
+          <el-input v-model="editProjectForm.projectId" name="projectId" tabindex="1" disabled />
         </el-form-item>
         <el-form-item label="项目名称">
           <el-input
-            v-model="editProjectForm.name"
+            v-model="editProjectForm.projectName"
             placeholder="请输入修改后的项目名"
-            name="name"
+            name="projectName"
             tabindex="2"
           />
         </el-form-item>
@@ -65,7 +65,7 @@
     </el-dialog>
     <el-dialog
       v-model="projectMemberVisible"
-      :title="project2showMember.id + project2showMember.name + '成员'"
+      :title="project2showMember.projectId + project2showMember.projectName + '成员'"
       width="75%"
     >
       <ProjectMember :project="project2showMember" />
@@ -74,12 +74,13 @@
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import Topbar from '@/components/system/Topbar.vue'
 import ProjectMember from './ProjectMember.vue'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
@@ -88,18 +89,15 @@ const editProjectVisible = ref(false)
 const projectMemberVisible = ref(false)
 const project2showMember = ref({})
 const editProjectForm = ref({
-  id: '',
-  name: '',
+  projectId: '',
+  projectName: '',
   description: ''
 })
-const projectTable = ref([])
-const allProjectTable = ref([
-  { name: '项目A', id: 'XM001', description: 'balabala' },
-  { name: '项目B', id: 'XM002', description: 'balabala' }
-])
+const projectList = ref([])
+const allProjectList = ref([])
 const handleEditProject = (index, row) => {
-  editProjectForm.value.id = row.id
-  editProjectForm.value.name = row.name
+  editProjectForm.value.projectId = row.projectId
+  editProjectForm.value.projectName = row.projectName
   editProjectForm.value.description = row.description
   editProjectVisible.value = true
 }
@@ -108,32 +106,56 @@ const showMember = (index, row) => {
   project2showMember.value = row
 }
 const gotoProject = (index, row) => {
-  router.push({ path: '/project', query: { projectId: row.id } })
+  router.push({ path: '/project', query: { projectId: row.projectId } })
 }
 const handleDeleteProject = (index, row) => {
-  ElMessageBox.confirm(`确认删除项目 ${row.id} ${row.name} ？`, '警告', {
+  ElMessageBox.confirm(`确认删除项目 ${row.projectId} ${row.projectName} ？`, '警告', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {})
+  }).then(() => {
+    HTTPAPI.deleteProject({ projectId: row.projectId }).then((res) => {
+      if (res.status !== 0) return
+      ElMessage.success('删除成功')
+      getAllProjectList()
+    })
+  })
 }
 const submitEditProject = (index, row) => {
   const form = editProjectForm.value
-  if (!form.id || !form.name || !form.description) return
-  editProjectVisible.value = false
-  editProjectForm.value = { id: '', name: '', description: '' }
+  if (!form.projectId || !form.projectName || !form.description) return
+  HTTPAPI.changeProjectInfo(form).then((res) => {
+    if (res.status !== 0) return
+    ElMessage.success('修改成功')
+    getAllProjectList()
+    editProjectVisible.value = false
+    editProjectForm.value = { projectId: '', projectName: '', description: '' }
+  })  
 }
-const searchCurProjectTable = (newS) => {
+const searchCurProjectList = (newS) => {
   const s = newS?.toLowerCase()
   if (s) {
-    projectTable.value = allProjectTable.value.filter((u) =>
-      `${u.name}${u.id}`.toLowerCase().includes(s)
+    projectList.value = allProjectList.value.filter((u) =>
+      `${u.projectName}${u.projectId}`.toLowerCase().includes(s)
     )
   } else {
-    projectTable.value = allProjectTable.value
+    projectList.value = allProjectList.value
   }
 }
-watch(searchContent, debounce(searchCurProjectTable, 500), { deep: true, immediate: true })
+watch(searchContent, debounce(searchCurProjectList, 500), { deep: true, immediate: true })
+
+const getAllProjectList = () => {
+  allProjectList.value = []
+  HTTPAPI.getAllProjects().then((res) => {
+    if (res.status !== 0) return
+    allProjectList.value = res.data.projects
+    searchCurProjectList()
+  })
+}
+
+onMounted(() => {
+  getAllProjectList()
+})
 </script>
 
 <style lang="less" scoped>

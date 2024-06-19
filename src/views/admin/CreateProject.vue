@@ -87,6 +87,7 @@
 
 <script setup>
 import HTTPAPI from '@/utils/http/api.js'
+import { ElMessage } from 'element-plus';
 import { ref, watch, computed, onMounted } from 'vue'
 const emit = defineEmits(['submitCreateClose'])
 const allUserList = ref([])
@@ -113,16 +114,22 @@ const addLeaderIntoCreateProject = () => {
   let existed = false
   const tmpleader = addLeaderForm.value
   if (!tmpleader.phone || !tmpleader.hospitalIdInProject || !tmpleader.hospitalNameInProject) return
-  const formLeaders = createProjectForm.value.leaders
-  for (let i = 0; i < formLeaders.length; i++) {
-    const fl = formLeaders[i]
-    if (fl.phone === tmpleader.phone) {
+  const targetUser = allUserList.value.find((u) => u.phone === tmpleader.phone)
+  if (!targetUser) {
+    ElMessage.error('该手机号用户不存在，请先添加用户')
+    return
+  }
+  tmpleader.id = targetUser.id
+  const existedLeaders = createProjectForm.value.leaders
+  for (let i = 0; i < existedLeaders.length; i++) {
+    const el = existedLeaders[i]
+    if (el.phone === tmpleader.phone) {
       existed = true
-      formLeaders.splice(i, 1, tmpleader)
+      existedLeaders.splice(i, 1, tmpleader)
       break
     }
   }
-  if (!existed) formLeaders.push(tmpleader)
+  if (!existed) existedLeaders.push(tmpleader)
   addLeaderVisible.value = false
   searchLeaderPhoneVisible.value = true
   resetForm('addLeaderForm')

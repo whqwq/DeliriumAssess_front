@@ -9,7 +9,7 @@
     </div>
     <div class="topbar-right">
       <div class="topbar-avatar">
-        <el-avatar>user</el-avatar>
+        <el-avatar>{{ username }}</el-avatar>
       </div>
     </div>
   </div>
@@ -17,12 +17,14 @@
 </template>
 
 <script setup>
+import Cookie from '@/utils/cookie.js'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const props = defineProps({
   showBack: { default: true },
   showLogo: { default: true }
 })
+const username = Cookie.getCookie('name')
 const goBack = () => {
   router.go(-1)
 }

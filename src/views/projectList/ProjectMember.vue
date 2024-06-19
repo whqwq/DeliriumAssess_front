@@ -1,8 +1,8 @@
 <template>
   <div class="projectMember-container">
     <!-- <div class="projectTitle">
-      <span>{{ project.id }}</span
-      ><span style="margin-left: 24px">{{ project.name }}</span>
+      <span>{{ project.projectId }}</span
+      ><span style="margin-left: 24px">{{ project.projectName }}</span>
     </div> -->
     <div class="header-line">
       <el-button type="primary" plain @click="addMemberVisible = true">添加成员</el-button>
@@ -13,10 +13,10 @@
         class="search-input"
       />
     </div>
-    <el-table :data="memberTable" class="projectMember-table">
+    <el-table :data="memberList" class="projectMember-table">
       <el-table-column prop="name" label="姓名"></el-table-column>
       <el-table-column prop="phone" label="电话"></el-table-column>
-      <el-table-column prop="hospital" label="医院"></el-table-column>
+      <el-table-column prop="hospitalNameInProject" label="医院"></el-table-column>
       <el-table-column prop="status" label="权限"></el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
@@ -42,16 +42,16 @@
         </el-form-item>
         <el-form-item label="医院名称">
           <el-input
-            v-model="addMemberForm.hospital"
+            v-model="addMemberForm.hospitalNameInProject"
             placeholder="请输入被添加者的医院名称"
-            name="hospital"
+            name="hospitalNameInProject"
           ></el-input>
         </el-form-item>
         <el-form-item label="医院编号">
           <el-input
-            v-model="addMemberForm.hospitalNo"
+            v-model="addMemberForm.hospitalIdInProject"
             placeholder="请输入该医院在项目内的编号"
-            name="hospitalNo"
+            name="hospitalIdInProject"
           ></el-input>
         </el-form-item>
         <el-button type="primary" @click="submitAddMember" style="width: 100%">添加</el-button>
@@ -61,48 +61,71 @@
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
-import { ref, watch, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, watch, computed, onMounted } from 'vue'
 const props = defineProps(['project'])
 const project = props.project
 
 const addMemberVisible = ref(false)
 const addMemberForm = ref({
   phone: '',
-  hospital: '',
-  hospitalNo: ''
+  hospitalNameInProject: '',
+  hospitalIdInProject: ''
 })
 const searchContent = ref('')
-const memberTable = ref([])
-const allMemberTabel = ref([
-  { name: 'Alex', phone: '151', hospital: 'Yi', status: '组长' },
-  { name: 'Caroel', phone: '122', hospital: 'Yi2', status: '组员' }
-])
-const searchCurMemberTable = (newS) => {
+const memberList = ref([])
+const allMemberList = ref([])
+const searchCurMemberList = (newS) => {
   const s = newS?.toLowerCase()
   if (s) {
-    memberTable.value = allMemberTabel.value.filter((m) =>
-      `${m.name}${m.phone}${m.hospital}`.toLowerCase().includes(s)
+    memberList.value = allMemberList.value.filter((m) =>
+      `${m.name}${m.phone}${m.hospitalNameInProject}`.toLowerCase().includes(s)
     )
   } else {
-    memberTable.value = allMemberTabel.value
+    memberList.value = allMemberList.value
   }
 }
 const submitAddMember = () => {
   const form = addMemberForm.value
-  if (!form.phone || !form.hospitalNo || !form.hospital) return
-  addMemberVisible.value = false
+  if (!form.phone || !form.hospitalIdInProject || !form.hospitalNameInProject) return
+  HTTPAPI.addProjectMember({
+    projectId: project.projectId,
+    phone: form.phone,
+    hospitalIdInProject: form.hospitalIdInProject,
+    hospitalNameInProject: form.hospitalNameInProject
+  }).then((res) => {
+    if (res.status !== 0) return
+    ElMessage.success('添加成功')
+    addMemberVisible.value = false
+    getAllMemberList()
+  })
 }
 const handleDeleteMember = (index, row) => {
   ElMessageBox.confirm(`确认移除成员 ${row.name} ${row.phone} ？`, '警告', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {})
+  }).then(() => {
+    HTTPAPI.deleteProjectMember({ projectId: project.projectId, doctorId: row.id }).then((res) => {
+      if (res.status !== 0) return
+      ElMessage.success('移除成功')
+      getAllMemberList()
+    })
+  })
 }
-watch(searchContent, debounce(searchCurMemberTable, 500), { deep: true, immediate: true })
+watch(searchContent, debounce(searchCurMemberList, 500), { deep: true, immediate: true })
+const getAllMemberList = () => {
+  HTTPAPI.getProjectMembers({ projectId: project.projectId }).then((res) => {
+    allMemberList.value = res.data.members
+    searchCurMemberList()
+  })
+}
+onMounted(() => {
+  getAllMemberList()
+})
 </script>
 
 <style scoped lang="less">
