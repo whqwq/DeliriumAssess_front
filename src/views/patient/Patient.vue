@@ -7,13 +7,13 @@
           <el-button type="primary" @click="chooseAssessVisible = true">进行谵妄评估</el-button>
         </template>
         <el-descriptions-item label="受试者编号">
-          {{ `${patient.idInProject} ${patient.alpha}` }}
+          {{ `${patient.patientIdInProject} ${patient.alpha}` }}
         </el-descriptions-item>
         <el-descriptions-item label="所属项目">
-          {{ `${project.id} ${project.name}` }}
+          {{ `${project.projectId} ${project.projectName}` }}
         </el-descriptions-item>
         <el-descriptions-item label="所属医院">
-          {{ `${patient.hospitalNo} ${patient.hospital}` }}
+          {{ `${patient.hospitalIdInProject} ${patient.hospitalNameInProject}` }}
         </el-descriptions-item>
         <el-descriptions-item label="手术日期">{{ patient.operateDate }}</el-descriptions-item>
       </el-descriptions>
@@ -47,15 +47,15 @@
       <div class="main-title">受试者历史评估记录</div>
       <el-table :data="assessmentList">
         <el-table-column prop="scale" label="评估量表"></el-table-column>
-        <el-table-column prop="time" label="评估时间" sortable>
+        <el-table-column prop="assessTime" label="评估时间" sortable>
           <template #default="scope">
-            {{ scope.row.time }}
+            {{ scope.row.assessTime }}
             <el-tag size="small" type="success">
               {{ `Day${scope.row.daysNum} ${scope.row.isAM ? '早' : '晚'}` }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="assessor" label="评估者"></el-table-column>
+        <el-table-column prop="assessorName" label="评估者"></el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
             <el-button size="small" @click="gotoAssessment(scope.$index, scope.row)">
@@ -80,6 +80,7 @@
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import moment from 'moment'
 import Topbar from '@/components/system/Topbar.vue'
 import { ref, computed, onMounted } from 'vue'
@@ -90,15 +91,15 @@ const router = useRouter()
 const assessType = ref('3D-CAM')
 const chooseAssessVisible = ref(false)
 const project = ref({
-  id: 'XM001',
-  name: '项目A'
+  projectId: 'XM001',
+  projectName: '项目A'
 })
 const patient = ref({
   id: route.query.patientId,
-  idInProject: '001',
+  patientIdInProject: '001',
   alpha: 'W',
-  hospital: '北医一院',
-  hospitalNo: '01',
+  hospitalNameInProject: '北医一院',
+  hospitalIdInProject: '01',
   operateDate: '2024-05-14',
   assessmentList: []
 })
@@ -127,8 +128,8 @@ const genAssessMatrix = () => {
   for (let i = 0; i < assessmentList.value.length; i++) {
     const a = assessmentList.value[i]
     if (a.daysNum > 0 && a.daysNum <= assessMatrixNum) {
-      if (a.isAM) matrixAM[a.daysNum].flag = 1
-      else matrixPM[a.daysNum].flag = 1
+      if (a.isAM) matrixAM[a.daysNum-1].flag = 1
+      else matrixPM[a.daysNum-1].flag = 1
     }
   }
   assessMatrixs.value = [matrixAM, matrixPM]
@@ -144,28 +145,22 @@ const gotoAssessment = (index, row) => {
 }
 const getPatientDetails = () => {
   patient.value = {}
-  const data = {
-    id: route.query.patientId,
-    idInProject: '001',
-    alpha: 'W',
-    hospital: '北医一院',
-    hospitalNo: '01',
-    operateDate: '2024-05-14',
-    assessmentList: [
-      { id: '1', scale: '3D-CAM', time: '2024-05-15 08:00', assessor: '王医生' },
-      { id: '2', scale: '3D-CAM', time: '2024-05-17 17:32', assessor: 'A医生' }
-    ]
-  }
-  const { operateDate } = data
-  const mmt_operateData = moment(operateDate)
-  for (let i = 0; i < data.assessmentList.length; i++) {
-    const a = data.assessmentList[i]
-    const mmt_time = moment(a.time)
-    a.daysNum = mmt_time.diff(mmt_operateData, 'days')
-    a.isAM = mmt_time.hour() <= 12
-  }
-  patient.value = data
-  genAssessMatrix()
+  HTTPAPI.getPatientDetails({ id: route.query.id }).then((res) => {
+    if (res.status !== 0) return
+    const data = { ...(res.data?.patient || {}), assessmentList: res.data?.assessments || [] }
+    const { operateDate } = data
+    const mmt_operateData = moment(operateDate)
+    for (let i = 0; i < data.assessmentList.length; i++) {
+      const a = data.assessmentList[i]
+      const mmt_time = moment(a.assessTime)
+      a.assessTime = mmt_time.format("YY-MM-DD HH:mm:ss")
+      a.daysNum = mmt_time.diff(mmt_operateData, 'days')
+      a.isAM = mmt_time.hour() <= 12
+    }
+    patient.value = data
+    console.log(data);
+    genAssessMatrix()
+  })
 }
 onMounted(() => {
   getPatientDetails()

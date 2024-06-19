@@ -21,13 +21,17 @@
             <el-button size="small" @click="showMember(scope.$index, scope.row)"
               >成员管理</el-button
             >
-            <el-button size="small" @click="handleEditProject(scope.$index, scope.row)"
+            <el-button
+              size="small"
+              @click="handleEditProject(scope.$index, scope.row)"
+              v-if="scope.row.isLeader"
               >修改信息</el-button
             >
             <el-button
               size="small"
               type="danger"
               @click="handleDeleteProject(scope.$index, scope.row)"
+              v-if="scope.row.isLeader"
             >
               删除
             </el-button>
@@ -130,7 +134,7 @@ const submitEditProject = (index, row) => {
     getAllProjectList()
     editProjectVisible.value = false
     editProjectForm.value = { projectId: '', projectName: '', description: '' }
-  })  
+  })
 }
 const searchCurProjectList = (newS) => {
   const s = newS?.toLowerCase()

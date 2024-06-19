@@ -3,28 +3,37 @@
     <Topbar />
     <div class="project-main">
       <div class="project-title">
-        <span>{{ project.id }}</span
-        ><span style="margin-left: 24px">{{ project.name }}</span>
+        <span>{{ project.projectName }}</span
+        ><span style="margin-left: 24px">{{ project.projectName }}</span>
       </div>
       <div class="project-description">{{ project.description }}</div>
     </div>
     <div class="project-main">
-      <PatientList :project="project" />
+      <PatientList :projectId="project.projectId" />
     </div>
   </div>
 </template>
 
 <script setup>
+import HTTPAPI from '@/utils/http/api.js'
 import PatientList from './PatientList.vue'
 import Topbar from '@/components/system/Topbar.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 const project = ref({
-  id: route.query.projectId,
-  name: '项目A',
-  description:
-    '这是XXX医院的XXX项目，编号为XXX，项目内容为ABCDEFGHIJKLMN，持续时间为XXXX-XXXX，预期达到XXXXX等效果'
+  projectId: route.query.projectId,
+  projectName: '',
+  description: ''
+})
+const getProjectInfo = () => {
+  HTTPAPI.getProjectInfo({ projectId: route.query.projectId }).then((res) => {
+    if (res.status !== 0) return
+    project.value = res.data.project
+  })
+}
+onMounted(() => {
+  getProjectInfo()
 })
 </script>
 

@@ -16,6 +16,8 @@ const createUser = (data) => post('/user/createUser', data)
 
 const getAllProjects = (data) => post('/project/getAllProjects', data)
 
+const getProjectInfo = (data) => post('/project/getProjectInfo', data)
+
 const createProject = (data) => post('/project/createProject', data)
 
 const changeProjectInfo = (data) => post('/project/changeProjectInfo', data)
@@ -53,6 +55,7 @@ export default {
   deleteUser,
   createUser,
   getAllProjects,
+  getProjectInfo,
   createProject,
   changeProjectInfo,
   deleteProject,

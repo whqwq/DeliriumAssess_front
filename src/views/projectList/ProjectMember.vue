@@ -5,7 +5,7 @@
       ><span style="margin-left: 24px">{{ project.projectName }}</span>
     </div> -->
     <div class="header-line">
-      <el-button type="primary" plain @click="addMemberVisible = true">添加成员</el-button>
+      <el-button v-if="isUserLeader" type="primary" plain @click="addMemberVisible = true">添加成员</el-button>
       <el-input
         v-model="searchContent"
         placeholder="搜索组内成员"
@@ -14,17 +14,23 @@
       />
     </div>
     <el-table :data="memberList" class="projectMember-table">
-      <el-table-column prop="name" label="姓名"></el-table-column>
+      <el-table-column label="姓名">
+        <template #default="scope">
+          <span>{{ scope.row.name }}</span>
+          <el-tag class="memberNameTag" v-if="scope.row.isLeader" type="success">组长</el-tag>
+          <el-tag class="memberNameTag" v-else>成员</el-tag>
+          <el-tag class="memberNameTag" v-if="scope.row.phone === userPhone" type="info">我</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="phone" label="电话"></el-table-column>
       <el-table-column prop="hospitalNameInProject" label="医院"></el-table-column>
-      <el-table-column prop="status" label="权限"></el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
           <el-button
             size="small"
             type="danger"
             @click="handleDeleteMember(scope.$index, scope.row)"
-            v-if="scope.row.status !== '组长'"
+            v-if="!scope.row.isLeader && scope.row.phone !== userPhone && isUserLeader"
           >
             移除
           </el-button>
@@ -61,11 +67,13 @@
 </template>
 
 <script setup>
+import Cookie from '@/utils/cookie.js'
 import HTTPAPI from '@/utils/http/api.js'
 import { debounce } from 'lodash'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, watch, computed, onMounted } from 'vue'
+const userPhone = Cookie.getCookie('phone')
 const props = defineProps(['project'])
 const project = props.project
 
@@ -78,6 +86,9 @@ const addMemberForm = ref({
 const searchContent = ref('')
 const memberList = ref([])
 const allMemberList = ref([])
+const isUserLeader = computed(() => {
+  return allMemberList.value.some((m) => m.phone === userPhone && m.isLeader)
+})
 const searchCurMemberList = (newS) => {
   const s = newS?.toLowerCase()
   if (s) {
@@ -144,5 +155,8 @@ onMounted(() => {
   .search-input {
     width: 250px;
   }
+}
+.memberNameTag {
+  margin-left: 4px;
 }
 </style>
