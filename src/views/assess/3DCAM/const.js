@@ -1,9 +1,5 @@
-import QuestionGroup from './QuestionGroup.vue'
-
-export const QUESTION_VISIT = 0
-export const QUESTION_OBSERVE = 1
-
-// const choiceTextValueMap = getChoiceMap(choices, 'text', 'value')获得选择题的文本和值的映射
+// 从候选项集合中,根据文本获得目标值; 同样是函数形式以获得新的对象
+// e.g. const choiceTextValueMap = getChoiceMap(choices, 'text', 'value') 获得选择题的文本和值的映射
 export const getChoiceMap = (choices, source, target) => {
   const map = {}
   for (let c of choices || []) {
@@ -53,6 +49,12 @@ choicesList[5] = [
   { text: '是', value: false }
 ]
 
+// 重点部分:3D-CAM评估量表
+// 每个量表项由问题question和答案answer组成
+// question包括问题编号i(后端中的questionNo)、问题内容content(后端questionContent)、问题提示answerTips、问题选项choices
+// question还包括是否为额外问题isExtra、在评估中是否隐藏isHide(会根据前面问题的答案来决定是否显示)
+// question中的answerTips是为了提示该问题的答案,但后面决定用统一的提示来替换,因此现在用不到,在QuestionGroup.vue中被注释掉了
+// answer包括选择答案choice(后端中的answerJudgement)、输入答案input(answerContent)、答案是否正确value(answerCorrect)、是否需要输入needInput
 export const getTemplateQAs = () => [
   {
     question: {
@@ -316,7 +318,9 @@ export const getTemplateQAs = () => [
 export const getQAbyId = (QAs, id) => QAs.filter((qa) => qa.question.i === id)[0]
 export const getQAsByIdList = (QAs, idList) => QAs.filter((qa) => idList.includes(qa.question.i))
 
-const templateQAs = getTemplateQAs()
+const templateQAs = getTemplateQAs() // 使用函数是希望每次获取模板时都是新的对象
+
+// 根据问题的类别,将问题分组加上组标题和组提示
 export const questionGroups = [
   {
     title: '定向力',
@@ -368,6 +372,7 @@ export const questionGroups = [
   }
 ]
 
+// 根据问题组的特征,将questionGroup合成评估页assessPage,按页显示
 export const getTemplateAssessPages = () => [
   { part: '访视部分', instruction: '定向力', questionGroups: [questionGroups[0]] },
   { part: '访视部分', instruction: '倒数/计算', questionGroups: questionGroups.slice(1, 4) },
@@ -375,6 +380,7 @@ export const getTemplateAssessPages = () => [
   { part: '观察部分', instruction: '观察评估', questionGroups: [questionGroups[5]] }
 ]
 
+// 统一的评估引导提示,同样是分成几页显示
 export const getTemplateAssessGuides = () => [
   {
     instruction: '定向力',
@@ -548,6 +554,7 @@ export const getTemplateAssessGuides = () => [
   }
 ]
 
+// 评估引导提示的最后一页是这个trick
 export const getTemplateAssessTricks = () => [
   '1．当您进门开始观察病人时，评估就开始了，当您的视线离开患者时评估结束。',
   '2. 当接近患者时，首先观察到患者是否对您的靠近有反应。如果没有被看到，则想办法吸引患者的注意力：和患者说话，轻轻触摸，轻晃或轻敲，适当晃动患者唤醒他。',
