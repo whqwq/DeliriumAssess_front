@@ -187,7 +187,7 @@ const gotoAssessmentResult = () => {
 }
 onMounted(() => {
   isShowBeginning.value = true
-  assessPages.value = JSON.parse(getTemplateAssessPagesWithAnswersJSON())
+  // assessPages.value = JSON.parse(getTemplateAssessPagesWithAnswersJSON())
 })
 </script>
 

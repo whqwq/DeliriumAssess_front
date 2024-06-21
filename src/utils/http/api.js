@@ -1,8 +1,8 @@
 import { post } from '@/utils/http/http.js'
 
-const getAllUsers = (data) => post('/user/getAllUsers', data)
+const login = (data) => post('/login', data)
 
-const login = (data) => post('/user/login', data)
+const getAllUsers = (data) => post('/user/getAllUsers', data)
 
 const changePassword = (data) => post('/user/changePassword', data)
 
